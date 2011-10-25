@@ -1,0 +1,3 @@
+[submodule "Mimex"]
+	path = Mimex
+	url = git://github.com/nocive/Mimex.git

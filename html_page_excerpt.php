@@ -2,32 +2,33 @@
 
 // @TODO logging
 
-define( 'HTML_PAGEEXCERPT_PATH', dirname( __FILE__ ) );
+define( 'HTML_PAGEEXCERPT_PATH', realpath( dirname( __FILE__ ) ) );
 define( 'HTML_PAGEEXCERPT_LOGPATH', HTML_PAGEEXCERPT_PATH );
 define( 'HTML_PAGEEXCERPT_LOGFILE', HTML_PAGEEXCERPT_LOGPATH . DIRECTORY_SEPARATOR . 'html_pageexcerpt.log' );
 
   
 
-/**************************************
- * 
+/**
  * Settings class
- * 
- **************************************/
+ *
+ * @package	HTML_PageExcerpt
+ * @subpackage	HTML_PageExcerpt::Settings
+ */
 class HTML_PageExcerpt_Settings
 {
 	/**
-	 * @var array
-	 * @access public
+	 * @var		array
+	 * @access	public
 	 */
 	public static $settings = array( 
-			'logging' => false, 
+			'logging' => true, 
 			'logfile' => HTML_PAGEEXCERPT_LOGFILE, 
 			'encoding' => 'UTF-8', 
-			'mimetypes_map_path' => '/etc/mime.types', 
+			//'mimetypes_map_path' => '/etc/mime.types', 
 			
 			'fetcher_proxy' => '', 
 			//'fetcher_proxy' => 'http://10.135.32.7:3128',
-			'fetcher_timeout' => 30, 
+			'fetcher_timeout' => 60, 
 			'fetcher_follow_location' => true, 
 			'fetcher_max_redirs' => 2, 
 			'fetcher_user_agent' => 'Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/534.24 (KHTML, like Gecko) Chrome/11.0.696.71 Safari/534.24', 
@@ -108,32 +109,15 @@ class HTML_PageExcerpt_Settings
 			'favicon_extensions_exclude' => array() 
 	);
 	
-	/**
-	 * @var array
-	 * @access public
-	 */
-	public static $extensions = array( 
-			'curl', 
-			'DOM', 
-			'iconv', 
-			//'tidy' 
-	);
-	
-	/**
-	 * @var array
-	 * @access public
-	 */
-	public static $dependencies = array( 
-			'MIME/Type.php' 
-	);
 	
 
 	/**
 	 * Enter description here ...
 	 * 
-	 * @param null|string $setting
-	 * @param mixed $value
-	 * @throws HTML_PageExcerpt_InvalidArgumentException
+	 * @param	string $setting				optional
+	 * @param	mixed $value
+	 * @throws	HTML_PageExcerpt_InvalidArgumentException
+	 * @return	void
 	 */
 	public static function set( $setting = null, $value )
 	{
@@ -151,8 +135,8 @@ class HTML_PageExcerpt_Settings
 	/**
 	 * Enter description here ...
 	 * 
-	 * @param [ null|string $setting ]
-	 * @return mixed
+	 * @param	string $setting		optional
+	 * @return	mixed
 	 */
 	public static function get( $setting = null )
 	{
@@ -161,93 +145,93 @@ class HTML_PageExcerpt_Settings
 		}
 		return isset( self::$settings[$setting] ) ? self::$settings[$setting] : null;
 	} // get }}}
-
-
-	/**
-	 * Enter description here ...
-	 * 
-	 * @throws HTML_PageExcerpt_FatalException
-	 */
-	public static function checkRequirements()
-	{
-		foreach ( self::$extensions as $ext ) {
-			if (! extension_loaded( $ext )) {
-				throw new HTML_PageExcerpt_FatalException( "Required extension '$ext' is not loaded!" );
-			}
-		}
-		
-		foreach ( self::$dependencies as $dep ) {
-			if (false === @include_once ($dep)) {
-				throw new HTML_PageExcerpt_FatalException( "Required dependency '$dep' was not found!" );
-			}
-		}
-	} // checkRequirements }}}
 }
 
-/**************************************
- * 
+
+/**
  * Main class
- * 
- **************************************/
+ *
+ * @package	HTML_PageExcerpt
+ */
 class HTML_PageExcerpt extends HTML_PageExcerpt_Object
 {
 	/**
-	 * @var HTML_PageExcerpt_Url
-	 * @access public
+	 * @var		array
+	 * @access	public
+	 */
+	public static $extensions = array( 
+			'curl', 
+			'DOM', 
+			'iconv', 
+			'fileinfo',
+			//'tidy' 
+	);
+	
+	/**
+	 * @var		array
+	 * @access	public
+	 */
+	public static $dependencies = array( 
+			'MIME/Type.php' 
+	);
+
+	/**
+	 * @var		HTML_PageExcerpt_Url
+	 * @access	public
 	 */
 	public $url;
 	
 	/**
-	 * @var string
-	 * @access public
+	 * @var		string
+	 * @access	public
 	 */
 	public $html;
 	
 	/**
-	 * @var HTML_PageExcerpt_Text
-	 * @access public
+	 * @var		HTML_PageExcerpt_Text
+	 * @access	public
 	 */
 	public $title;
 	
 	/**
-	 * @var HTML_PageExcerpt_Text
-	 * @access public
+	 * @var		HTML_PageExcerpt_Text
+	 * @access	public
 	 */
 	public $excerpt;
 	
 	/**
-	 * @var HTML_PageExcerpt_Image
-	 * @access public
+	 * @var		HTML_PageExcerpt_Image
+	 * @access	public
 	 */
 	public $favicon;
 	
 	/**
-	 * @var array
-	 * @access public
+	 * @var		array
+	 * @access	public
 	 */
 	public $thumbnails;
 	
 	/**
-	 * @var DOMDocument
-	 * @access protected
+	 * @var		DOMDocument
+	 * @access	protected
 	 */
 	protected $_dom;
 	
 	/**
-	 * @var DOMXPath
-	 * @access protected
+	 * @var		DOMXPath
+	 * @access	protected
 	 */
 	protected $_xpath;
 	
 	/**
-	 * @var bool
-	 * @access protected
+	 * @var		bool
+	 * @access	protected
 	 */
 	protected $_loaded = false;
 	
 	/**
-	 * @var array
-	 * @access protected
+	 * @var		array
+	 * @access	protected
 	 */
 	protected $_fields = array( 
 			'title',
@@ -260,17 +244,13 @@ class HTML_PageExcerpt extends HTML_PageExcerpt_Object
 	/**
 	 * Enter description here ...
 	 * 
-	 * @param [ string $source ]
-	 * @param [ array $settings ]
+	 * @param	string $source		optional
+	 * @param	array $settings		optional
+	 * @return	void
 	 */
 	public function __construct( $source = null, $settings = null )
 	{
-		static $requirementsChecked = false;
-
-		if (! $requirementsChecked) {
-			HTML_PageExcerpt_Settings::checkRequirements();
-			$requirementsChecked = true;
-		}
+		$this->checkRequirements();
 
 		if ($settings !== null) {
 			$this->config( null, $settings );
@@ -284,8 +264,9 @@ class HTML_PageExcerpt extends HTML_PageExcerpt_Object
 	/**
 	 * Enter description here ...
 	 * 
-	 * @param [ string $setting ]
-	 * @throws HTML_PageExcerpt_FileReadWriteException
+	 * @param	string $source					optional
+	 * @throws	HTML_PageExcerpt_FileReadWriteException
+	 * @return	void
 	 */
 	public function load( $source = null )
 	{
@@ -312,9 +293,10 @@ class HTML_PageExcerpt extends HTML_PageExcerpt_Object
 	/**
 	 * Enter description here ...
 	 * 
-	 * @param string $html
-	 * @param [ string $url ]
-	 * @throws HTML_PageExcerpt_FatalException
+	 * @param	string $html
+	 * @param	string $url				optional
+	 * @throws	HTML_PageExcerpt_FatalException
+	 * @return	void
 	 */
 	public function loadHTML( $html, $url = null )
 	{
@@ -338,8 +320,9 @@ class HTML_PageExcerpt extends HTML_PageExcerpt_Object
 	/**
 	 * Enter description here ...
 	 * 
-	 * @param null|string $setting
-	 * @param mixed $value
+	 * @param	string $setting		optional
+	 * @param	mixed $value
+	 * @return	mixed
 	 */
 	public function config( $setting = null, $value )
 	{
@@ -350,9 +333,9 @@ class HTML_PageExcerpt extends HTML_PageExcerpt_Object
 	/**
 	 * Enter description here ...
 	 * 
-	 * @param null|string|array $fields
-	 * @return mixed
-	 * @throws HTML_PageExcerpt_FatalException
+	 * @param	mixed $fields				string, array or null
+	 * @throws	HTML_PageExcerpt_FatalException
+	 * @return	mixed
 	 */
 	public function get( $fields = '*' )
 	{
@@ -387,6 +370,8 @@ class HTML_PageExcerpt extends HTML_PageExcerpt_Object
 
 	/**
 	 * Enter description here ...
+	 *
+	 * @return	void
 	 */
 	public function reset()
 	{
@@ -404,8 +389,35 @@ class HTML_PageExcerpt extends HTML_PageExcerpt_Object
 
 	/**
 	 * Enter description here ...
+	 *
+	 * @throws	HTML_PageExcerpt_FatalException
+	 * @return	void
+	 */
+	public function checkRequirements()
+	{
+		static $checked = false;
+
+		if (! $checked) {
+			foreach ( self::$extensions as $ext ) {
+				if (! extension_loaded( $ext )) {
+					throw new HTML_PageExcerpt_FatalException( "Required extension '$ext' is not loaded!" );
+				}
+			}
+			
+			foreach ( self::$dependencies as $dep ) {
+				if (false === @include_once ($dep)) {
+					throw new HTML_PageExcerpt_FatalException( "Required dependency '$dep' was not found!" );
+				}
+			}
+		}
+	} // checkRequirements }}}
+
+
+	/**
+	 * Enter description here ...
 	 * 
-	 * @param string $html
+	 * @param	string $html
+	 * @return	void
 	 */
 	protected function _loadDocument( $html )
 	{
@@ -413,7 +425,7 @@ class HTML_PageExcerpt extends HTML_PageExcerpt_Object
 		$dom->preserveWhitespace = false;
 		@$dom->loadHTML( $html );
 	 
-		$dom->encoding = $this->_getDOMEncoding( $dom );
+		$dom->encoding = $this->_getEncoding( $dom );
 		$html = $this->_repairHTML( $html, $dom->encoding, HTML_PageExcerpt_Settings::get( 'encoding' ) );
 		
 		@$dom->loadHTML( $html );
@@ -431,10 +443,10 @@ class HTML_PageExcerpt extends HTML_PageExcerpt_Object
 	/**
 	 * Enter description here ...
 	 * 
-	 * @param DOMDocument $dom
-	 * @return string
+	 * @param	DOMDocument $dom
+	 * @return	string
 	 */
-	protected function _getDOMEncoding( &$dom )
+	protected function _getEncoding( &$dom )
 	{
 		// get encoding from announced http content type header, if any
 		if (! empty( $this->url->encoding )) {
@@ -446,6 +458,7 @@ class HTML_PageExcerpt extends HTML_PageExcerpt_Object
 			// if DOMDocument fails to find correct encoding, try to get it from meta tags
 			$xpath = new DOMXPath( $dom );
 			$elements = $xpath->query( '/html/head/meta[@http-equiv="Content-Type"]/@content' );
+			unset( $xpath );
 			$matches = array();
 			if ($elements->length === 1 && preg_match( '@^.+;\s*charset=(.*)$@', $elements->item( 0 )->nodeValue, $matches )) {
 				return $matches[1];
@@ -454,16 +467,16 @@ class HTML_PageExcerpt extends HTML_PageExcerpt_Object
 		
 		// assume default encoding if no encoding found
 		return empty( $dom->encoding ) ? HTML_PageExcerpt_Settings::get( 'encoding' ) : $dom->encoding;
-	} // _getDOMEncoding }}}
+	} // _getEncoding }}}
 
 
 	/**
 	 * Enter description here ...
 	 * 
-	 * @param string $html
-	 * @param string $fromEncoding
-	 * @param string $toEncoding
-	 * @return string
+	 * @param	string $html
+	 * @param	string $fromEncoding
+	 * @param	string $toEncoding
+	 * @return	string
 	 */
 	protected function _repairHTML( $html, $fromEncoding, $toEncoding )
 	{
@@ -510,9 +523,7 @@ class HTML_PageExcerpt extends HTML_PageExcerpt_Object
 		// run tidy on html to get a clean version
 		$tidy = new tidy();
 		// tidy only accepts 'utf8' and html_entity_decode only accepts 'utf-8', hence the str_replace
-		$html = $tidy->repairString( $html, array( 
-				'wrap' => 0 
-		), str_replace( '-', '', $toEncoding ) );
+		$html = $tidy->repairString( $html, array( 'wrap' => 0 ), str_replace( '-', '', $toEncoding ) );
 		*/
 
 		return $html;
@@ -522,10 +533,10 @@ class HTML_PageExcerpt extends HTML_PageExcerpt_Object
 	/**
 	 * Enter description here ...
 	 * 
-	 * @param string $str
-	 * @param string $from
-	 * @param string $to
-	 * @return string
+	 * @param	string $str
+	 * @param	string $from
+	 * @param	string $to
+	 * @return	string
 	 */
 	protected function _convertEncoding( $str, $from, $to )
 	{
@@ -536,8 +547,8 @@ class HTML_PageExcerpt extends HTML_PageExcerpt_Object
 	/**
 	 * Enter description here ...
 	 * 
-	 * @param string $what
-	 * @return mixec
+	 * @param	string $what
+	 * @return	mixed
 	 */
 	protected function _find( $what )
 	{
@@ -555,7 +566,7 @@ class HTML_PageExcerpt extends HTML_PageExcerpt_Object
 	/**
 	 * Enter description here ...
 	 * 
-	 * @return HTML_PageExcerpt_Text
+	 * @return	HTML_PageExcerpt_Text
 	 */
 	protected function _findTitle()
 	{
@@ -598,8 +609,9 @@ class HTML_PageExcerpt extends HTML_PageExcerpt_Object
 				}
 			} // end switch
 		} // end foreach
-		if (HTML_PageExcerpt_Settings::get( 'title_truncate' ) && $excerpt instanceof HTML_PageExcerpt_Text) {
-			$excerpt->truncate( HTML_PageExcerpt_Settings::get( 'title_truncate_length' ), HTML_PageExcerpt_Settings::get( 'title_truncate_terminator' ) );
+
+		if (HTML_PageExcerpt_Settings::get( 'title_truncate' ) && $title instanceof HTML_PageExcerpt_Text) {
+			$title->truncate( HTML_PageExcerpt_Settings::get( 'title_truncate_length' ), HTML_PageExcerpt_Settings::get( 'title_truncate_terminator' ) );
 		}
 		$this->title = $title;
 		return $title;
@@ -609,7 +621,7 @@ class HTML_PageExcerpt extends HTML_PageExcerpt_Object
 	/**
 	 * Enter description here ...
 	 * 
-	 * @return HTML_PageExcerpt_Text
+	 * @return	HTML_PageExcerpt_Text
 	 */
 	protected function _findExcerpt()
 	{
@@ -674,7 +686,7 @@ class HTML_PageExcerpt extends HTML_PageExcerpt_Object
 	/**
 	 * Enter description here ...
 	 * 
-	 * @return array
+	 * @return	array
 	 */
 	protected function _findThumbnails()
 	{
@@ -756,7 +768,7 @@ class HTML_PageExcerpt extends HTML_PageExcerpt_Object
 	/**
 	 * Enter description here ...
 	 * 
-	 * @return HTML_PageExcerpt_Image
+	 * @return	HTML_PageExcerpt_Image
 	 */
 	protected function _findFavicon()
 	{
@@ -807,9 +819,9 @@ class HTML_PageExcerpt extends HTML_PageExcerpt_Object
 	/**
 	 * Enter description here ...
 	 * 
-	 * @param string $type
-	 * @param string $url
-	 * @return bool
+	 * @param	string $type
+	 * @param	string $url
+	 * @return	bool
 	 */
 	protected function _isUrlBlacklisted( $type, $url )
 	{
@@ -825,7 +837,8 @@ class HTML_PageExcerpt extends HTML_PageExcerpt_Object
 	/**
 	 * Enter description here ...
 	 * 
-	 * @param string $type
+	 * @param	string $type
+	 * @return	array
 	 */
 	protected function _getFilterOpts( $type )
 	{
@@ -868,74 +881,20 @@ class HTML_PageExcerpt extends HTML_PageExcerpt_Object
 			);
 		}
 	} // _getFilterOpts }}}
-
-
-	/**
-	 * Enter description here ...
-	 * 
-	 * @param [ array $urls ]
-	 */
-	public static function runTests( $urls = null )
-	{
-		$config = null;
-		//$config = array( 'fetcher_user_agent' => 'fake' );
-		$instance = isset( $this ) ? $this : new HTML_PageExcerpt( null, $config );
-		
-		$_urls = array( 
-				'http://vimeo.com/24997574', 
-				'http://circuspt.blogs.sapo.pt/276442.html', 
-				'http://www.publico.pt/Tecnologia/nova-legislacao-para-combate-a-pirataria-no-prazo-maximo-de-um-ano_1500632', 
-				'http://www.youtube.com/watch?v=EmLHOGT0v4c&feature=related', 
-				'http://photosynth.net/', 
-				'http://www.almadeviajante.com/travelnews/005273.php', 
-				'http://www.dn.pt/inicio/opiniao/interior.aspx?content_id=1882957&seccao=Jo%E3o+C%E9sar+das+Neves&tag=Opini%E3o+-+Em+Foco&page=-1', 
-				'http://cavalinhoselvagem.blogspot.com/2011/07/aniversariantes-de-julho.html', 
-				'http://mfmodafeminina.blogs.sapo.pt/21640.html', 
-				'http://enfermagemnopc.blogs.sapo.pt/707.html', 
-				'http://alentejomagazine.com/2006/02/632/', 
-				'http://www.noticiasdevilareal.com/noticias/index.php?action=getDetalhe&id=762', 
-				'http://pplware.sapo.pt/windows/software/auslogics-duplicate-file-finder-remova-ficheiros-repetidos/', 
-				'http://musica.sapo.pt/noticias/kaossilator_-_sintetizador_de_bolso', 
-				'http://www.setubalnarede.pt/content/index.php?action=articlesDetailFo&rec=9255', 
-				'http://www.ionline.pt/conteudo/7749-europeias-ferreira-leite-apela-ao-dever-civico-que-todos-tem-votar',
-				'http://www.sodoliva.com',
-				'http://www.sabado.pt/Actualidade/Especial-Europeias/Blogues.aspx',
-				'https://www.sugarsync.com/',
-				'http://www.jogossantacasa.pt/',
-				'http://www.jn.pt/PaginaInicial/Policia/Interior.aspx?content_id=1902690',
-				'http://www.cmjornal.xl.pt/detalhe/noticias/exclusivo-cm/angelico-gnr-investiga-crime-de-homicidio',
-				'http://www.agencia.ecclesia.pt/cgi-bin/noticia.pl?id=31713',
-				'http://www.jn.pt/PaginaInicial/Mundo/Interior.aspx?content_id=1770243',
-		);
-		
-		error_reporting( E_ALL );
-		if ($urls === null) {
-			$urls = &$_urls;
-		}
-		
-		foreach ( $urls as $url ) {
-			$instance->load( $url );
-			echo "$url\n";
-			echo str_repeat( '-', 200 ) . "\n";
-			//var_dump( $instance->get( 'favicon' ) );
-			var_dump( $instance->get( array('title', 'excerpt') ) );
-			//var_dump($instance->get());
-			echo "\n\n";
-			//$instance->reset();
-		}
-	} // runTests }}}
 }
 
-/**************************************
- * 
+
+/**
  * Text class
- * 
- **************************************/
+ *
+ * @package	HTML_PageExcerpt
+ * @subpackage	HTML_PageExcerpt::Text
+ */
 class HTML_PageExcerpt_Text extends HTML_PageExcerpt_Object
 {
 	/**
-	 * @var string
-	 * @access public
+	 * @var		string
+	 * @access	public
 	 */
 	public $content;
 
@@ -943,8 +902,8 @@ class HTML_PageExcerpt_Text extends HTML_PageExcerpt_Object
 	/**
 	 * Enter description here ...
 	 * 
-	 * @param string $str
-	 * @param [ bool $sanitize ]
+	 * @param	string $str
+	 * @param	bool $sanitize	optional
 	 */
 	public function __construct( $str, $sanitize = true )
 	{
@@ -955,8 +914,9 @@ class HTML_PageExcerpt_Text extends HTML_PageExcerpt_Object
 	/**
 	 * Enter description here ...
 	 * 
-	 * @param int $length
-	 * @param [ string $terminator ]
+	 * @param	int $length
+	 * @param	string $terminator	optional
+	 * @return	string
 	 */
 	public function truncate( $length, $terminator = ' ...' )
 	{
@@ -972,9 +932,9 @@ class HTML_PageExcerpt_Text extends HTML_PageExcerpt_Object
 	/**
 	 * Enter description here ...
 	 *
-	 * @param array $criteria : Possible criterias: min_length, max_length
-	 * @return bool
-	 * @throws HTML_PageExcerpt_InvalidArgumentException
+	 * @param	array $criteria					possible criterias: min_length, max_length
+	 * @throws	HTML_PageExcerpt_InvalidArgumentException
+	 * @return	bool
 	 */
 	public function matches( $criteria )
 	{
@@ -992,8 +952,8 @@ class HTML_PageExcerpt_Text extends HTML_PageExcerpt_Object
 	/**
 	 * Enter description here ...
 	 * 
-	 * @param string $str
-	 * @return string
+	 * @param	string $str
+	 * @return	string
 	 */
 	public function sanitize( $str )
 	{
@@ -1006,9 +966,12 @@ class HTML_PageExcerpt_Text extends HTML_PageExcerpt_Object
 
 		// turn utf8 nbsp's into normal spaces
 		// @see http://en.wikipedia.org/wiki/Non-breaking_space
-		$str = str_replace( "\xc2\xa0", ' ', $str );
+		//$str = str_replace( "\xc2\xa0", ' ', $str );
 		// remove extra whitespace
-		$str = trim( preg_replace( '@\s\s+@', ' ', $str ) );
+		//$str = trim( preg_replace( '@\s\s+@', ' ', $str ) );
+
+		// replace all known unicode whitespaces with space
+		$str = preg_replace( '@[\pZ\pC]+@mu', ' ', $str );
 
 		// remove spaces before commas
 		$str = preg_replace( '@\s,@', ',', $str );
@@ -1017,17 +980,23 @@ class HTML_PageExcerpt_Text extends HTML_PageExcerpt_Object
 	} // _sanitize }}}
 
 
+	/**
+	 * Enter description here ...
+	 *
+	 * @param	string $target
+	 * @return	string
+	 */
 	public function linkify( $target = '_blank' )
 	{
 		$target = ! empty( $target ) ? ' target="_blank"' : '';
 		$this->content = preg_replace( '@(https?://[^\s]+)@', "<a href=\"\\1\"$target>\\1</a>", $this->content );
-	}
+	} // linkify }}}
 
 
 	/**
 	 * Enter description here ...
 	 * 
-	 * @return string
+	 * @return	string
 	 */
 	public function __toString()
 	{
@@ -1038,7 +1007,7 @@ class HTML_PageExcerpt_Text extends HTML_PageExcerpt_Object
 	/**
 	 * Enter description here ...
 	 * 
-	 * @return bool
+	 * @return	bool
 	 */
 	public function isEmpty()
 	{
@@ -1046,52 +1015,54 @@ class HTML_PageExcerpt_Text extends HTML_PageExcerpt_Object
 	} // isEmpty }}}
 }
 
-/**************************************
- * 
+
+/**
  * Image class
- * 
- **************************************/
+ *
+ * @package	HTML_PageExcerpt
+ * @subpackage	HTML_PageExcerpt::Image
+ */
 class HTML_PageExcerpt_Image extends HTML_PageExcerpt_Object
 {
 	/**
-	 * @var HTML_PageExcerpt_Url
-	 * @access public
+	 * @var		HTML_PageExcerpt_Url
+	 * @access	public
 	 */
 	public $url;
 	
 	/**
-	 * @var int
-	 * @access public
+	 * @var		int
+	 * @access	public
 	 */
 	public $width;
 	
 	/**
-	 * @var int
-	 * @access public
+	 * @var		int
+	 * @access	public
 	 */
 	public $height;
 	
 	/**
-	 * @var string
-	 * @access public
+	 * @var		string
+	 * @access	public
 	 */
 	public $mimetype;
 	
 	/**
-	 * @var string
-	 * @access public
+	 * @var		string
+	 * @access	public
 	 */
 	public $extension;
 	
 	/**
-	 * @var int
-	 * @access public
+	 * @var		int
+	 * @access	public
 	 */
 	public $size;
 	
 	/**
-	 * @var array
-	 * @access protected
+	 * @var		array
+	 * @access	protected
 	 */
 	protected $_fields = array( 
 			'url', 
@@ -1103,14 +1074,14 @@ class HTML_PageExcerpt_Image extends HTML_PageExcerpt_Object
 	);
 	
 	/**
-	 * @var bool
-	 * @access protected
+	 * @var		bool
+	 * @access	protected
 	 */
 	protected $_identified = false;
 	
 	/**
-	 * @var string
-	 * @access protected
+	 * @var		string
+	 * @access	protected
 	 */
 	protected $_tmpfilename;
 
@@ -1118,8 +1089,8 @@ class HTML_PageExcerpt_Image extends HTML_PageExcerpt_Object
 	/**
 	 * Enter description here ...
 	 * 
-	 * @param string $url
-	 * @param [ bool $identify ]
+	 * @param	string $url
+	 * @param	bool $identify	optional
 	 */
 	public function __construct( $url, $identify = false )
 	{
@@ -1148,7 +1119,9 @@ class HTML_PageExcerpt_Image extends HTML_PageExcerpt_Object
 	/**
 	 * Enter description here ...
 	 * 
-	 * @throws HTML_PageExcerpt_InvalidImageFileException
+	 * @throws	HTML_PageExcerpt_InvalidImageFileException
+	 * @throws	HTML_PageExcerpt_FatalException
+	 * @return	void
 	 */
 	public function identify()
 	{
@@ -1167,9 +1140,12 @@ class HTML_PageExcerpt_Image extends HTML_PageExcerpt_Object
 			throw new HTML_PageExcerpt_InvalidImageFileException( 'File is not a valid image' );
 		}
 		
-		$this->extension = HTML_PageExcerpt_Utils::sysMimetypeToExtension( $this->mimetype );
+		//$this->extension = HTML_PageExcerpt_Utils::sysMimetypeToExtension( $this->mimetype );
+
 		$this->size = filesize( $this->_tmpfilename );
-		list( $this->width, $this->height ) = $this->_getImageSize( $this->_tmpfilename );
+		if (false === ($imginfo = @getimagesize( $this->_tmpfilename ))) {
+			throw new HTML_PageExcerpt_FatalException( "Error calling getimagesize() on image '{$this->_tmpfilename}'" );
+		}
 		
 		$this->_identified = true;
 	} // identify }}}
@@ -1178,14 +1154,11 @@ class HTML_PageExcerpt_Image extends HTML_PageExcerpt_Object
 	/**
 	 * Enter description here ...
 	 *
-	 * @param $criteria
-	 * 		Possible criterias:
-	 *			mimetypes_include, mimetypes_exclude
-	 *			extensions_include, extensions_exclude
-	 *			min_width, max_width, min_height, max_height, min_size, max_size
-	 * @return bool
-	 * @throws HTML_PageExcerpt_InvalidArgumentException
-	 * @throws HTML_PageExcerpt_FatalException
+	 * @param	$criteria	Possible criterias: mimetypes_include, mimetypes_exclude, extensions_include, extensions_exclude
+	 *				min_width, max_width, min_height, max_height, min_size, max_size
+	 * @throws	HTML_PageExcerpt_InvalidArgumentException
+	 * @throws	HTML_PageExcerpt_FatalException
+	 * @return	bool
 	 */
 	public function matches( $criteria )
 	{
@@ -1210,6 +1183,7 @@ class HTML_PageExcerpt_Image extends HTML_PageExcerpt_Object
 			
 			$mimetypes_include = array();
 			foreach ( $extensions_include as $ext ) {
+				// FIXME
 				$mime = HTML_PageExcerpt_Utils::sysExtensionToMimetype( $ext );
 				if (! empty( $mime )) {
 					$mimetypes_include[] = $mime;
@@ -1224,6 +1198,7 @@ class HTML_PageExcerpt_Image extends HTML_PageExcerpt_Object
 			
 			$mimetypes_exclude = array();
 			foreach ( $extensions_exclude as $ext ) {
+				// FIXME
 				$mime = HTML_PageExcerpt_Utils::sysExtensionToMimetype( $ext );
 				if (! empty( $mime )) {
 					$mimetypes_exclude[] = $mime;
@@ -1277,8 +1252,8 @@ class HTML_PageExcerpt_Image extends HTML_PageExcerpt_Object
 	/**
 	 * Enter description here ...
 	 * 
-	 * @param [ array|string $fields ]
-	 * @return mixed
+	 * @param	mixed $fields	array, string or null for all fields
+	 * @return	mixed
 	 */
 	public function info( $fields = null )
 	{
@@ -1309,20 +1284,9 @@ class HTML_PageExcerpt_Image extends HTML_PageExcerpt_Object
 	/**
 	 * Enter description here ...
 	 * 
-	 * @return bool
-	 */
-	public function isIco()
-	{
-		// use mimetype here, since extension is not fully supported
-		return ($this->mimetype === 'image/x-icon');
-	} // isIco }}}
-
-
-	/**
-	 * Enter description here ...
-	 * 
-	 * @param string $path
-	 * @param [ int $perms ]
+	 * @param	string $path
+	 * @param	int $perms
+	 * @return	void
 	 */
 	public function save( $path, $perms = 0666 )
 	{
@@ -1333,8 +1297,8 @@ class HTML_PageExcerpt_Image extends HTML_PageExcerpt_Object
 	/**
 	 * Enter description here ...
 	 * 
-	 * @return string
-	 * @throws HTML_PageExcerpt_FileReadWriteException
+	 * @throws	HTML_PageExcerpt_FileReadWriteException
+	 * @return	string
 	 */
 	public function content()
 	{
@@ -1355,7 +1319,7 @@ class HTML_PageExcerpt_Image extends HTML_PageExcerpt_Object
 	 * @param string $file
 	 * @return array
 	 */
-	protected function _getImageSize( $file )
+	/*protected function _getImageSize( $file )
 	{
 		if ($this->isIco() && ! defined( 'IMAGETYPE_ICO' )) {
 			// if PHP version doesn't support ico for getimagesize, use the fallback class
@@ -1372,7 +1336,7 @@ class HTML_PageExcerpt_Image extends HTML_PageExcerpt_Object
 				$width, 
 				$height 
 		);
-	} // _getImageSize }}}
+	} // _getImageSize }}}*/
 
 
 	/**
@@ -1386,46 +1350,54 @@ class HTML_PageExcerpt_Image extends HTML_PageExcerpt_Object
 	} // __toString }}}
 }
 
-/**************************************
- * 
+
+/**
  * Url class
- * 
- **************************************/
+ *
+ * @package	HTML_PageExcerpt
+ * @subpackage	HTML_PageExcerpt::Url
+ */
 class HTML_PageExcerpt_Url extends HTML_PageExcerpt_Object
 {
 	/**
-	 * @var string
-	 * @access public
+	 * @var		string
+	 * @access	public
 	 */
 	public $url;
 	
 	/**
-	 * @var string
-	 * @access public
+	 * @var		string
+	 * @access	public
 	 */
 	public $content;
 	
 	/**
-	 * @var string
-	 * @access public
+	 * @var		string
+	 * @access	public
 	 */
 	public $contentType;
 	
 	/**
-	 * @var string
-	 * @access public
+	 * @var		string
+	 * @access	public
 	 */
 	public $encoding;
+
+	/**
+	 * @var		resource
+	 * @access	public
+	 */
+	protected $_curl;
 	
 	/**
-	 * @var bool
-	 * @access protected
+	 * @var		bool
+	 * @access	protected
 	 */
 	protected $_fetched = false;
 	
 	/**
-	 * @var array
-	 * @access protected
+	 * @var		array
+	 * @access	protected
 	 */
 	protected $_fetchDefaultOptions = array( 
 			'timeout' => 20, 
@@ -1438,8 +1410,8 @@ class HTML_PageExcerpt_Url extends HTML_PageExcerpt_Object
 	);
 	
 	/**
-	 * @var array
-	 * @access protected
+	 * @var		array
+	 * @access	protected
 	 */
 	protected $_recognizedSchemes = array( 
 			'http', 
@@ -1450,22 +1422,18 @@ class HTML_PageExcerpt_Url extends HTML_PageExcerpt_Object
 	/**
 	 * Enter description here ...
 	 * 
-	 * @param [ string $url ]
-	 * @param [ bool $sanitize ]
-	 * @param [ bool $fetch ]
-	 * @throws HTML_PageExcerpt_CommunicationException
+	 * @param	string $url					optional
+	 * @param	bool $sanitize					optional
+	 * @param	bool $fetch					optional
+	 * @throws	HTML_PageExcerpt_CommunicationException
 	 */
 	public function __construct( $url = null, $sanitize = true, $fetch = false )
 	{
 		if ($url !== null) {
 			$url = $this->set( $url, $sanitize );
 			if ($fetch) {
-				if (false === ($content = $this->fetch())) {
-					throw new HTML_PageExcerpt_CommunicationException( "Error fetching url '$url'" );
-				}
-				$this->content = $content;
+				$this->content = $this->fetch();
 			}
-			$this->url = $url;
 		}
 	} // __construct }}}
 
@@ -1473,9 +1441,9 @@ class HTML_PageExcerpt_Url extends HTML_PageExcerpt_Object
 	/**
 	 * Enter description here ...
 	 * 
-	 * @param string $url
-	 * @param [ bool $sanitize ]
-	 * @return string
+	 * @param	string $url
+	 * @param	bool $sanitize	optional
+	 * @return	string
 	 */
 	public function set( $url, $sanitize = true )
 	{
@@ -1491,9 +1459,9 @@ class HTML_PageExcerpt_Url extends HTML_PageExcerpt_Object
 	/**
 	 * Enter description here ...
 	 * 
-	 * @param string $base
-	 * @return string
-	 * @throws HTML_PageExcerpt_InvalidArgumentException
+	 * @param	string $base
+	 * @throws	HTML_PageExcerpt_InvalidArgumentException
+	 * @return	string
 	 */
 	public function absolutize( $base )
 	{
@@ -1552,8 +1520,8 @@ class HTML_PageExcerpt_Url extends HTML_PageExcerpt_Object
 	/**
 	 * Enter description here ...
 	 * 
-	 * @param [ string $str ]
-	 * @return bool
+	 * @param	string $str	optional
+	 * @return	bool
 	 */
 	public function isAbsolute( $str = null )
 	{
@@ -1565,7 +1533,7 @@ class HTML_PageExcerpt_Url extends HTML_PageExcerpt_Object
 	/**
 	 * Enter description here ...
 	 * 
-	 * @return bool
+	 * @return	bool
 	 */
 	public function isValid()
 	{
@@ -1576,9 +1544,9 @@ class HTML_PageExcerpt_Url extends HTML_PageExcerpt_Object
 	/**
 	 * Enter description here ...
 	 * 
-	 * @return string
-	 * @throws HTML_PageExcerpt_InvalidArgumentException
-	 * @throws HTML_PageExcerpt_CommunicationException
+	 * @throws	HTML_PageExcerpt_InvalidArgumentException
+	 * @throws	HTML_PageExcerpt_CommunicationException
+	 * @return	string
 	 */
 	public function fetch()
 	{
@@ -1593,39 +1561,41 @@ class HTML_PageExcerpt_Url extends HTML_PageExcerpt_Object
 		}
 		extract( $options );
 		
-		$ch = curl_init();
-		curl_setopt( $ch, CURLOPT_URL, $this->url );
-		curl_setopt( $ch, CURLOPT_RETURNTRANSFER, true );
-		curl_setopt( $ch, CURLOPT_CONNECTTIMEOUT, $timeout );
-		curl_setopt( $ch, CURLOPT_USERAGENT, $user_agent );
-		curl_setopt( $ch, CURLOPT_FOLLOWLOCATION, $follow_location );
-		curl_setopt( $ch, CURLOPT_MAXREDIRS, $max_redirs );
+		$this->_curl = curl_init();
+		curl_setopt( $this->_curl, CURLOPT_URL, $this->url );
+		curl_setopt( $this->_curl, CURLOPT_RETURNTRANSFER, true );
+		curl_setopt( $this->_curl, CURLOPT_CONNECTTIMEOUT, $timeout );
+		curl_setopt( $this->_curl, CURLOPT_USERAGENT, $user_agent );
+		curl_setopt( $this->_curl, CURLOPT_FOLLOWLOCATION, $follow_location );
+		curl_setopt( $this->_curl, CURLOPT_MAXREDIRS, $max_redirs );
+		curl_setopt( $this->_curl, CURLOPT_SSL_VERIFYPEER, false );
 		if (! empty( $proxy )) {
-			curl_setopt( $ch, CURLOPT_PROXY, $proxy );
+			curl_setopt( $this->_curl, CURLOPT_PROXY, $proxy );
 		}
 		if ($fake_referer) {
-			curl_setopt( $ch, CURLOPT_REFERER, $this->url );
+			curl_setopt( $this->_curl, CURLOPT_REFERER, $this->url );
 		}
 		
 		$logstr = "fetching url: '{$this->url}', timeout: $timeout, ua: $user_agent, follow_loc: " . ($follow_location ? 'y' : 'n');
 		$logstr .= ", max_redirs: $max_redirs, proxy: $proxy, fake_ref: " . ($fake_referer ? 'y' : 'n');
 		$this->log( $logstr, 'debug' );
 		
-		$content = curl_exec( $ch );
+		$content = curl_exec( $this->_curl );
 
-		$httpStatusCode = curl_getinfo( $ch, CURLINFO_HTTP_CODE );
-		$contentType = curl_getinfo( $ch, CURLINFO_CONTENT_TYPE );
+		$httpStatusCode = curl_getinfo( $this->_curl, CURLINFO_HTTP_CODE );
+		$contentType = curl_getinfo( $this->_curl, CURLINFO_CONTENT_TYPE );
 
 		$encoding = null;
 		$matches = array();
 		if (preg_match( '@^.+;\s*charset=(.*)$@', $contentType, $matches )) {
 			$encoding = $matches[1];
 		}
-		curl_close( $ch );
 		
 		if ($content === false || $httpStatusCode !== 200) {
-			throw new HTML_PageExcerpt_CommunicationException( "Error fetching content from url '{$this->url}'" );
+			throw new HTML_PageExcerpt_CommunicationException( "Error fetching content from url '{$this->url}'" . (curl_errno( $this->_curl ) ? ', curl error: ' . curl_error( $this->_curl ) : '' ) );
 		}
+
+		curl_close( $this->_curl );
 		
 		$this->_fetched = true;
 		$this->content = $content;
@@ -1638,9 +1608,10 @@ class HTML_PageExcerpt_Url extends HTML_PageExcerpt_Object
 	/**
 	 * Enter description here ...
 	 * 
-	 * @param string $path
-	 * @param [ int $perms ]
-	 * @throws HTML_PageExcerpt_FileReadWriteException
+	 * @param	string $path
+	 * @param	int $perms					optional
+	 * @throws	HTML_PageExcerpt_FileReadWriteException
+	 * @return	bool
 	 */
 	public function save( $path, $perms = 0666 )
 	{
@@ -1658,6 +1629,8 @@ class HTML_PageExcerpt_Url extends HTML_PageExcerpt_Object
 
 	/**
 	 * Enter description here ...
+	 *
+	 * @return	string
 	 */
 	public function content()
 	{
@@ -1668,6 +1641,11 @@ class HTML_PageExcerpt_Url extends HTML_PageExcerpt_Object
 	} // content }}}
 
 
+	/**
+	 * Enter description here ...
+	 *
+	 * @return	string
+	 */
 	public function __toString()
 	{
 		return $this->url;
@@ -1677,8 +1655,8 @@ class HTML_PageExcerpt_Url extends HTML_PageExcerpt_Object
 	/**
 	 * Enter description here ...
 	 * 
-	 * @param string $url
-	 * @return $url
+	 * @param	string $url
+	 * @return	string
 	 */
 	public function sanitize( $url )
 	{
@@ -1686,16 +1664,15 @@ class HTML_PageExcerpt_Url extends HTML_PageExcerpt_Object
 	} // sanitize }}}
 }
 
-/**************************************
- * 
- * Object class
- * all classes extend this one
- * 
- **************************************/
+
+/**
+ * Object class, all classes extends this one
+ *
+ * @package	HTML_PageExcerpt
+ * @subpackage	HTML_PageExcerpt::Object
+ */
 class HTML_PageExcerpt_Object
 {
-
-
 	/**
 	 * Enter description here ...
 	 */
@@ -1717,9 +1694,9 @@ class HTML_PageExcerpt_Object
 	/**
 	 * Enter description here ...
 	 * 
-	 * @param string $str
-	 * @param string $level
-	 * @return bool
+	 * @param	string $str
+	 * @param	string $level
+	 * @return	bool
 	 */
 	public function log( $str, $level )
 	{
@@ -1731,22 +1708,25 @@ class HTML_PageExcerpt_Object
 	} // log }}}
 }
 
-/**************************************
- * 
+
+/**
  * Utilities class
- * 
- **************************************/
+ *
+ * @package	HTML_PageExcerpt
+ * @subpackage	HTML_PageExcerpt::Utils
+ */
 class HTML_PageExcerpt_Utils
 {
 	/**
 	 * Enter description here ...
 	 * 
-	 * @param string $logfile
-	 * @param string $str
-	 * @param string $level
-	 * @param bool $appendNewLine
-	 * @throws HTML_PageExcerpt_FatalException
-	 * @throws HTML_PageExcerpt_FileReadWriteException
+	 * @param	string $logfile
+	 * @param	string $str
+	 * @param	string $level
+	 * @param	bool $appendNewLine
+	 * @throws	HTML_PageExcerpt_FatalException
+	 * @throws	HTML_PageExcerpt_FileReadWriteException
+	 * @return	void
 	 */
 	public static function log( $logfile, $str, $level, $appendNewline = true )
 	{
@@ -1770,11 +1750,11 @@ class HTML_PageExcerpt_Utils
 	/**
 	 * Enter description here ...
 	 * 
-	 * @param string $str
-	 * @param int $length
-	 * @param [ string $terminator ]
-	 * @param [ int $minword ]
-	 * @return string
+	 * @param	string $str
+	 * @param	int $length
+	 * @param	string $terminator	optional
+	 * @param	int $minword		optional
+	 * @return	string
 	 */
 	public static function substrw( $str, $length, $terminator = '...', $minword = 3 )
 	{
@@ -1798,10 +1778,10 @@ class HTML_PageExcerpt_Utils
 	/**
 	 * Enter description here ...
 	 * 
-	 * @param string $prefix
-	 * @param [ bool $touch ]
-	 * @return string
-	 * @throws HTML_PageExcerpt_FileReadWriteException
+	 * @param	string $prefix
+	 * @param	bool $touch
+	 * @throws	HTML_PageExcerpt_FileReadWriteException
+	 * @return	string
 	 */
 	public static function tempFilename( $prefix, $touch = false )
 	{
@@ -1818,28 +1798,36 @@ class HTML_PageExcerpt_Utils
 	/**
 	 * Enter description here ...
 	 * 
-	 * @param string $filename
-	 * @return string
+	 * @param	string $filename
+	 * @return	string
 	 */
 	public static function fileMimetype( $filename )
 	{
-		$mime = MIME_Type::autoDetect( $filename );
+		$finfo = new finfo( FILEINFO_MIME_TYPE );
+		return $finfo->file($finfo, $filename );
+		
+		/*$mime = MIME_Type::autoDetect( $filename );
 		// fix erroneous returned mimetype for ico files
 		if ($mime === 'image/x-ico') {
 			$mime = 'image/x-icon';
 		}
-		return $mime;
+		return $mime;*/
 	} // fileMimetype }}}
 
 
 	/**
 	 * Enter description here ...
 	 * 
-	 * @param DOMDocumentNode
-	 * @return string
+	 * @param	DOMNode
+	 * @throws	HTML_PageExcerpt_InvalidArgumentException
+	 * @return	string
 	 */
 	public static function DOMinnerHTML( $element )
 	{
+		if (! $element instanceof DOMNode) {
+			throw new HTML_PageExcerpt_InvalidArgumentException( 'Supplied element is not a DOMNode instance' );
+		}
+
 		$innerHTML = '';
 		$children = $element->childNodes;
 		foreach ( $children as $child ) {
@@ -1856,7 +1844,7 @@ class HTML_PageExcerpt_Utils
 	 * 
 	 * @return array
 	 */
-	public static function sysExtensionMimetypes()
+	/*public static function sysExtensionMimetypes()
 	{
 		$mimeMap = self::_getMimetypesMap();
 		# Returns the system MIME type mapping of extensions to MIME types, as defined in /etc/mime.types.
@@ -1878,7 +1866,7 @@ class HTML_PageExcerpt_Utils
 		}
 		fclose( $file );
 		return $out;
-	} // sysExtensionMimetypes }}}
+	} // sysExtensionMimetypes }}}*/
 
 
 	/**
@@ -1887,7 +1875,7 @@ class HTML_PageExcerpt_Utils
 	 * @param string $file
 	 * @return string
 	 */
-	public static function sysExtensionToMimetype( $file )
+	/*public static function sysExtensionToMimetype( $file )
 	{
 		# Returns the system MIME type (as defined in /etc/mime.types) for the filename specified.
 		#
@@ -1902,7 +1890,7 @@ class HTML_PageExcerpt_Utils
 		}
 		$ext = strtolower( $ext );
 		return isset( $types[$ext] ) ? $types[$ext] : null;
-	} // sysExtensionToMimetype }}}
+	} // sysExtensionToMimetype }}}*/
 
 
 	/**
@@ -1910,7 +1898,7 @@ class HTML_PageExcerpt_Utils
 	 * 
 	 * @return array
 	 */
-	public static function sysMimetypeExtensions()
+	/*public static function sysMimetypeExtensions()
 	{
 		$mimeMap = self::_getMimetypesMap();
 		# Returns the system MIME type mapping of MIME types to extensions, as defined in /etc/mime.types (considering the first
@@ -1933,7 +1921,7 @@ class HTML_PageExcerpt_Utils
 		}
 		fclose( $file );
 		return $out;
-	} // sysMimetypeExtensions }}}
+	} // sysMimetypeExtensions }}}*/
 
 
 	/**
@@ -1942,7 +1930,7 @@ class HTML_PageExcerpt_Utils
 	 * @param string $type
 	 * @return string
 	 */
-	public static function sysMimetypeToExtension( $type )
+	/*public static function sysMimetypeToExtension( $type )
 	{
 		# Returns the canonical file extension for the MIME type specified, as defined in /etc/mime.types (considering the first
 		# extension listed to be canonical).
@@ -1958,7 +1946,7 @@ class HTML_PageExcerpt_Utils
 			$extension = 'jpg';
 		}
 		return $extension;
-	} // sysMimetypeToExtension }}}
+	} // sysMimetypeToExtension }}}*/
 
 
 	/**
@@ -1967,7 +1955,7 @@ class HTML_PageExcerpt_Utils
 	 * @return array
 	 * @throws HTML_PageExcerpt_FatalException
 	 */
-	protected static function _getMimetypesMap()
+	/*protected static function _getMimetypesMap()
 	{
 		static $checked = false;
 		
@@ -1983,7 +1971,7 @@ class HTML_PageExcerpt_Utils
 		}
 		
 		return $mimetypesMap;
-	} // _getMimetypesMap }}}
+	} // _getMimetypesMap }}}*/
 
 
 	/**
@@ -1991,11 +1979,12 @@ class HTML_PageExcerpt_Utils
 	 * 
 	 * @return bool
 	 */
-	public static function isWindows()
+	/*public static function isWindows()
 	{
 		// praize to god it returns false :)
 		return (strtoupper( substr( PHP_OS, 0, 3 ) ) === 'WIN');
-	} // isWindows }}}
+	} // isWindows }}}*/
+
 
 	/**
 	 * Enter description here ...
@@ -2007,10 +1996,8 @@ class HTML_PageExcerpt_Utils
 	{
 		static $from = '';
 		static $to = '';
-
-		static $width = 16; # number of bytes per line
-
-		static $pad = '.'; # padding for non-visible characters
+		static $width = 16; // number of bytes per line
+		static $pad = '.'; // padding for non-visible characters
 
 		if ($from === '') {
 			for ($i=0; $i<=0xFF; $i++) {
@@ -2039,181 +2026,5 @@ class HTML_PageExcerpt_InvalidArgumentException extends HTML_PageExcerpt_Excepti
 class HTML_PageExcerpt_FileReadWriteException extends HTML_PageExcerpt_Exception {}
 class HTML_PageExcerpt_InvalidImageFileException extends HTML_PageExcerpt_Exception {}
 class HTML_PageExcerpt_FatalException extends HTML_PageExcerpt_Exception {}
-
-
-/**
- * Class Ico
- * Open ICO files and extract any size/depth to PNG format
- *
- * @author Diogo Resende <me@diogoresende.net>
- * @version 0.1
- *
- * @method public  Ico($path = '')
- * @method public  LoadFile($path)
- * @method private LoadData($data)
- * @method public  TotalIcons()
- * @method public  GetIconInfo($index)
- **/
-class Ico
-{
-	/**
-	 * Ico::Ico()
-	 * Class constructor
-	 *
-	 * @param   optional    string   $path   Path to ICO file
-	 * @return              void
-	 **/
-	function Ico( $path = '' )
-	{
-		if (strlen( $path ) > 0) {
-			$this->LoadFile( $path );
-		}
-	}
-
-
-	/**
-	 * Ico::LoadFile()
-	 * Load an ICO file (don't need to call this is if fill the
-	 * parameter in the class constructor)
-	 *
-	 * @param   string   $path   Path to ICO file
-	 * @return  boolean          Success
-	 **/
-	function LoadFile( $path )
-	{
-		$this->_filename = $path;
-		if (($fp = @fopen( $path, 'rb' )) !== false) {
-			$data = '';
-			while ( ! feof( $fp ) ) {
-				$data .= fread( $fp, 4096 );
-			}
-			fclose( $fp );
-			
-			return $this->LoadData( $data );
-		}
-		return false;
-	}
-
-
-	/**
-	 * Ico::LoadData()
-	 * Load an ICO data. If you prefer to open the file
-	 * and return the binary data you can use this function
-	 * directly. Otherwise use LoadFile() instead.
-	 *
-	 * @param   string   $data   Binary data of ICO file
-	 * @return  boolean          Success
-	 **/
-	function LoadData( $data )
-	{
-		$this->formats = array();
-		
-		/**
-		 * ICO header
-		 **/
-		$icodata = unpack( "SReserved/SType/SCount", $data );
-		$this->ico = $icodata;
-		$data = substr( $data, 6 );
-		
-		/**
-		 * Extract each icon header
-		 **/
-		for ($i = 0; $i < $this->ico['Count']; $i ++) {
-			$icodata = unpack( "CWidth/CHeight/CColorCount/CReserved/SPlanes/SBitCount/LSizeInBytes/LFileOffset", $data );
-			$icodata['FileOffset'] -= ($this->ico['Count'] * 16) + 6;
-			if ($icodata['ColorCount'] == 0)
-				$icodata['ColorCount'] = 256;
-			$this->formats[] = $icodata;
-			
-			$data = substr( $data, 16 );
-		}
-		
-		/**
-		 * Extract aditional headers for each extracted icon header
-		 **/
-		for ($i = 0; $i < count( $this->formats ); $i ++) {
-			$icodata = unpack( "LSize/LWidth/LHeight/SPlanes/SBitCount/LCompression/LImageSize/LXpixelsPerM/LYpixelsPerM/LColorsUsed/LColorsImportant", substr( $data, $this->formats[$i]['FileOffset'] ) );
-			
-			$this->formats[$i]['header'] = $icodata;
-			$this->formats[$i]['colors'] = array();
-			
-			$this->formats[$i]['BitCount'] = $this->formats[$i]['header']['BitCount'];
-			
-			switch ($this->formats[$i]['BitCount']) {
-			case 32:
-			case 24:
-				$length = $this->formats[$i]['header']['Width'] * $this->formats[$i]['header']['Height'] * ($this->formats[$i]['BitCount'] / 8);
-				$this->formats[$i]['data'] = substr( $data, $this->formats[$i]['FileOffset'] + $this->formats[$i]['header']['Size'], $length );
-				break;
-			case 8:
-			case 4:
-				$icodata = substr( $data, $this->formats[$i]['FileOffset'] + $icodata['Size'], $this->formats[$i]['ColorCount'] * 4 );
-				$offset = 0;
-				/*for ($j = 0; $j < $this->formats[$i]['ColorCount']; $j ++) {
-					$this->formats[$i]['colors'][] = array( 
-							'red' => ord( $icodata[$offset] ), 
-							'green' => ord( $icodata[$offset + 1] ), 
-							'blue' => ord( $icodata[$offset + 2] ), 
-							'reserved' => ord( $icodata[$offset + 3] ) 
-					);
-					$offset += 4;
-				}*/
-				$length = $this->formats[$i]['header']['Width'] * $this->formats[$i]['header']['Height'] * (1 + $this->formats[$i]['BitCount']) / $this->formats[$i]['BitCount'];
-				$this->formats[$i]['data'] = substr( $data, $this->formats[$i]['FileOffset'] + ($this->formats[$i]['ColorCount'] * 4) + $this->formats[$i]['header']['Size'], $length );
-				break;
-			case 1:
-				$icodata = substr( $data, $this->formats[$i]['FileOffset'] + $icodata['Size'], $this->formats[$i]['ColorCount'] * 4 );
-				
-				/*$this->formats[$i]['colors'][] = array( 
-						'blue' => ord( $icodata[0] ), 
-						'green' => ord( $icodata[1] ), 
-						'red' => ord( $icodata[2] ), 
-						'reserved' => ord( $icodata[3] ) 
-				);
-				$this->formats[$i]['colors'][] = array( 
-						'blue' => ord( $icodata[4] ), 
-						'green' => ord( $icodata[5] ), 
-						'red' => ord( $icodata[6] ), 
-						'reserved' => ord( $icodata[7] ) 
-				);*/
-				
-				$length = $this->formats[$i]['header']['Width'] * $this->formats[$i]['header']['Height'] / 8;
-				$this->formats[$i]['data'] = substr( $data, $this->formats[$i]['FileOffset'] + $this->formats[$i]['header']['Size'] + 8, $length );
-				break;
-			}
-			$this->formats[$i]['data_length'] = strlen( $this->formats[$i]['data'] );
-		}
-		
-		return true;
-	}
-
-
-	/**
-	 * Ico::TotalIcons()
-	 * Return the total icons extracted at the moment
-	 *
-	 * @return  integer   Total icons
-	 **/
-	function TotalIcons()
-	{
-		return count( $this->formats );
-	}
-
-
-	/**
-	 * Ico::GetIconInfo()
-	 * Return the icon header corresponding to that index
-	 *
-	 * @param   integer   $index    Icon index
-	 * @return  resource            Icon header
-	 **/
-	function GetIconInfo( $index )
-	{
-		if (isset( $this->formats[$index] )) {
-			return $this->formats[$index];
-		}
-		return false;
-	}
-}
 
 ?>
