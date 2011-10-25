@@ -1776,12 +1776,6 @@ class HTML_PageExcerpt_Utils
 	 */
 	public static function mimetypeToExtension( $mimetype )
 	{
-		/*static $mte;
-
-		if (! $mte) {
-			$mte = new MIME_Type_Extension();
-		}
-		return $mte->getExtension( $mimetype );*/
 		return Mimex::mimetypeToExtension( $mimetype );
 	} // mimetypeToExtension }}}
 
@@ -1794,7 +1788,7 @@ class HTML_PageExcerpt_Utils
 
 	public static function fileDetectMimetype( $filename )
 	{
-		static $finfo;
+		/*static $finfo;
 
 		if (! $finfo) {
 			$finfo = new finfo( FILEINFO_MIME_TYPE );
@@ -1804,7 +1798,8 @@ class HTML_PageExcerpt_Utils
 		if ($mimetype === 'image/x-ico') {
 			$mimetype = 'image/x-icon';
 		}
-		return $mimetype;
+		return $mimetype;*/
+		return Mimex::mimetype( $filename, true );
 	} // fileDetectMimetype }}}
 
 
