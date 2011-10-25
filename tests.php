@@ -61,9 +61,9 @@ class HTML_PageExcerpt_Tests
 			$this->instance->load( $url );
 			echo "$url\n";
 			echo str_repeat( '-', 200 ) . "\n";
-			var_dump( $this->instance->get( 'favicon' ) );
+			//var_dump( $this->instance->get( 'favicon' ) );
 			//var_dump( $this->instance->get( array('title', 'excerpt') ) );
-			//var_dump($this->instance->get());
+			var_dump($this->instance->get());
 			echo "\n\n";
 		}
 	} // run }}}

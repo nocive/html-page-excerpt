@@ -24,7 +24,6 @@ class HTML_PageExcerpt_Settings
 			'logging' => true, 
 			'logfile' => HTML_PAGEEXCERPT_LOGFILE, 
 			'encoding' => 'UTF-8', 
-			//'mimetypes_map_path' => '/etc/mime.types', 
 			
 			'fetcher_proxy' => '', 
 			//'fetcher_proxy' => 'http://10.135.32.7:3128',
@@ -90,8 +89,8 @@ class HTML_PageExcerpt_Settings
 			), 
 			
 			// favicon settings
-			'favicon_min_width' => 16, 
-			'favicon_min_height' => 16, 
+			'favicon_min_width' => 0, 
+			'favicon_min_height' => 0, 
 			'favicon_max_width' => 0, 
 			'favicon_max_height' => 0, 
 			'favicon_max_tries' => 10, 
@@ -172,7 +171,7 @@ class HTML_PageExcerpt extends HTML_PageExcerpt_Object
 	 * @access	public
 	 */
 	public static $dependencies = array( 
-			'MIME/Type.php' 
+			'Mimex/mimex.php'
 	);
 
 	/**
@@ -972,11 +971,10 @@ class HTML_PageExcerpt_Text extends HTML_PageExcerpt_Object
 
 		// replace all known unicode whitespaces with space
 		$str = preg_replace( '@[\pZ\pC]+@mu', ' ', $str );
-
 		// remove spaces before commas
 		$str = preg_replace( '@\s,@', ',', $str );
 		
-		return $str;
+		return trim( $str );
 	} // _sanitize }}}
 
 
@@ -1135,17 +1133,19 @@ class HTML_PageExcerpt_Image extends HTML_PageExcerpt_Object
 		// free some memory
 		unset( $this->url->content );
 		
-		$this->mimetype = HTML_PageExcerpt_Utils::fileMimetype( $this->_tmpfilename );
+		$this->mimetype = HTML_PageExcerpt_Utils::fileDetectMimetype( $this->_tmpfilename );
 		if (strpos( $this->mimetype, 'image/' ) !== 0) {
 			throw new HTML_PageExcerpt_InvalidImageFileException( 'File is not a valid image' );
 		}
 		
-		//$this->extension = HTML_PageExcerpt_Utils::sysMimetypeToExtension( $this->mimetype );
-
 		$this->size = filesize( $this->_tmpfilename );
 		if (false === ($imginfo = @getimagesize( $this->_tmpfilename ))) {
 			throw new HTML_PageExcerpt_FatalException( "Error calling getimagesize() on image '{$this->_tmpfilename}'" );
 		}
+		$this->width = $imginfo[0];
+		$this->height = $imginfo[1];
+		// use image_type_to_extension because it's cheaper
+		$this->extension = image_type_to_extension( $imginfo[2], false );
 		
 		$this->_identified = true;
 	} // identify }}}
@@ -1183,8 +1183,7 @@ class HTML_PageExcerpt_Image extends HTML_PageExcerpt_Object
 			
 			$mimetypes_include = array();
 			foreach ( $extensions_include as $ext ) {
-				// FIXME
-				$mime = HTML_PageExcerpt_Utils::sysExtensionToMimetype( $ext );
+				$mime = HTML_PageExcerpt_Utils::extensionToMimetype( $ext );
 				if (! empty( $mime )) {
 					$mimetypes_include[] = $mime;
 				}
@@ -1198,8 +1197,7 @@ class HTML_PageExcerpt_Image extends HTML_PageExcerpt_Object
 			
 			$mimetypes_exclude = array();
 			foreach ( $extensions_exclude as $ext ) {
-				// FIXME
-				$mime = HTML_PageExcerpt_Utils::sysExtensionToMimetype( $ext );
+				$mime = HTML_PageExcerpt_Utils::extensionToMimetype( $ext );
 				if (! empty( $mime )) {
 					$mimetypes_exclude[] = $mime;
 				}
@@ -1241,11 +1239,11 @@ class HTML_PageExcerpt_Image extends HTML_PageExcerpt_Object
 		}
 		
 		return 	(empty( $min_width ) || $this->width >= $min_width) && 
-				(empty( $max_width ) || $this->width <= $max_width) && 
-				(empty( $min_height ) || $this->height >= $min_height) && 
-				(empty( $max_height ) || $this->height <= $max_height) && 
-				(empty( $min_size ) || $this->size >= $min_size) && 
-				(empty( $max_size ) || $this->size <= $max_size);
+			(empty( $max_width ) || $this->width <= $max_width) && 
+			(empty( $min_height ) || $this->height >= $min_height) && 
+			(empty( $max_height ) || $this->height <= $max_height) && 
+			(empty( $min_size ) || $this->size >= $min_size) && 
+			(empty( $max_size ) || $this->size <= $max_size);
 	} // matches }}}
 
 
@@ -1311,32 +1309,6 @@ class HTML_PageExcerpt_Image extends HTML_PageExcerpt_Object
 		}
 		return $content;
 	} // content }}}
-
-
-	/**
-	 * Enter description here ...
-	 * 
-	 * @param string $file
-	 * @return array
-	 */
-	/*protected function _getImageSize( $file )
-	{
-		if ($this->isIco() && ! defined( 'IMAGETYPE_ICO' )) {
-			// if PHP version doesn't support ico for getimagesize, use the fallback class
-			$ico = new ico();
-			$ico->LoadFile( $file );
-			$info = $ico->GetIconInfo( 0 );
-			$width = $info['Width'];
-			$height = $info['Height'];
-		} else {
-			list ( $width, $height ) = @getimagesize( $file );
-		}
-		
-		return array( 
-				$width, 
-				$height 
-		);
-	} // _getImageSize }}}*/
 
 
 	/**
@@ -1795,24 +1767,45 @@ class HTML_PageExcerpt_Utils
 	} // tempFilename }}}
 
 
+
 	/**
 	 * Enter description here ...
-	 * 
-	 * @param	string $filename
+	 *
+	 * @param	string $mimetype
 	 * @return	string
 	 */
-	public static function fileMimetype( $filename )
+	public static function mimetypeToExtension( $mimetype )
 	{
-		$finfo = new finfo( FILEINFO_MIME_TYPE );
-		return $finfo->file($finfo, $filename );
-		
-		/*$mime = MIME_Type::autoDetect( $filename );
-		// fix erroneous returned mimetype for ico files
-		if ($mime === 'image/x-ico') {
-			$mime = 'image/x-icon';
+		/*static $mte;
+
+		if (! $mte) {
+			$mte = new MIME_Type_Extension();
 		}
-		return $mime;*/
-	} // fileMimetype }}}
+		return $mte->getExtension( $mimetype );*/
+		return Mimex::mimetypeToExtension( $mimetype );
+	} // mimetypeToExtension }}}
+
+
+	public static function extensionToMimetype( $extension )
+	{
+		return Mimex::extensionToMimetype( $extension );
+	} // extensionToMimetype }}}
+
+
+	public static function fileDetectMimetype( $filename )
+	{
+		static $finfo;
+
+		if (! $finfo) {
+			$finfo = new finfo( FILEINFO_MIME_TYPE );
+		}
+		$mimetype = $finfo->file( $filename);
+		// fix erroneous mimetype for favicons
+		if ($mimetype === 'image/x-ico') {
+			$mimetype = 'image/x-icon';
+		}
+		return $mimetype;
+	} // fileDetectMimetype }}}
 
 
 	/**
