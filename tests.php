@@ -78,6 +78,6 @@ error_reporting( E_ALL );
 $config = null;
 //$config = array( 'fetcher_user_agent' => 'fake' );
 $tests = new HTML_PageExcerpt_Tests( $config );
-$tests->run('http://www.publico.pt/Tecnologia/nova-legislacao-para-combate-a-pirataria-no-prazo-maximo-de-um-ano_1500632');
+$tests->run();
 
 ?>
