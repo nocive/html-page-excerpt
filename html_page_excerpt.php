@@ -1,6 +1,14 @@
 <?php
 
-// @TODO logging
+/**
+ * HTML Page Excerpt class
+ * This class attempts to retrieve an excerpt for the requested url, as seen on facebook "share" feature
+ * It currently supports: title, text excerpt, thumbnails and favicon
+ *
+ *
+ * @author Jose' Pedro Saraiva <nocive at gmail.com>
+ * @package HTML_PageExcerpt
+ */
 
 define( 'HTML_PAGEEXCERPT_PATH', realpath( dirname( __FILE__ ) ) );
 define( 'HTML_PAGEEXCERPT_LOGPATH', HTML_PAGEEXCERPT_PATH );
@@ -62,12 +70,11 @@ class HTML_PageExcerpt_Settings
 			
 			// thumbnails settings
 			'thumbnails_seo_tags_ignore_filters' => false,
-			'thumbnails_stop_on_first_found' => false, 
-			// TODO thumbnails_found_stop_count instead of the above
+			'thumbnails_found_stop_count' => 0, 
 			'thumbnails_min_width' => 100, 
 			'thumbnails_min_height' => 100, 
-			'thumbnails_max_width' => 250, 
-			'thumbnails_max_height' => 250, 
+			'thumbnails_max_width' => 0, 
+			'thumbnails_max_height' => 0, 
 			'thumbnails_max_tries' => 10, 
 			'thumbnails_min_size' => 0, 
 			'thumbnails_max_size' => 0, 
@@ -239,6 +246,8 @@ class HTML_PageExcerpt extends HTML_PageExcerpt_Object
 			'favicon' 
 	);
 
+	const PHP_MIN_VERSION = '5.3.0';
+
 
 	/**
 	 * Enter description here ...
@@ -397,6 +406,9 @@ class HTML_PageExcerpt extends HTML_PageExcerpt_Object
 		static $checked = false;
 
 		if (! $checked) {
+			if (version_compare( PHP_VERSION, self::PHP_MIN_VERSION ) < 0) {
+				throw new HTML_PageExcerpt_FatalException( 'This class requires PHP version >= ' . self::PHP_MIN_VERSION );
+			}
 			foreach ( self::$extensions as $ext ) {
 				if (! extension_loaded( $ext )) {
 					throw new HTML_PageExcerpt_FatalException( "Required extension '$ext' is not loaded!" );
@@ -736,6 +748,7 @@ class HTML_PageExcerpt extends HTML_PageExcerpt_Object
 				$thumbs[] = $candidate;
 			}
 			
+			// all Url class instances will be converted to string after calling array_unique
 			$thumbs = array_unique( $thumbs );
 
 			// we should validate after array_unique, otherwise we could be wasting a lot of resources on repeated url's
@@ -744,7 +757,7 @@ class HTML_PageExcerpt extends HTML_PageExcerpt_Object
 					$t->identify();
 					if ($t->matches( $this->_getFilterOpts( 'thumbnails' ) )) {
 						$thumbnails[] = $t;
-						if (HTML_PageExcerpt_Settings::get( 'thumbnails_stop_on_first_found' )) {
+						if (count( $thumbnails ) >= HTML_PageExcerpt_Settings::get( 'thumbnails_found_stop_count' )) {
 							break;
 						}
 					}
@@ -1385,7 +1398,7 @@ class HTML_PageExcerpt_Url extends HTML_PageExcerpt_Object
 	 * @var		array
 	 * @access	protected
 	 */
-	protected $_recognizedSchemes = array( 
+	protected $_validSchemes = array( 
 			'http', 
 			'https' 
 	);
@@ -1397,7 +1410,6 @@ class HTML_PageExcerpt_Url extends HTML_PageExcerpt_Object
 	 * @param	string $url					optional
 	 * @param	bool $sanitize					optional
 	 * @param	bool $fetch					optional
-	 * @throws	HTML_PageExcerpt_CommunicationException
 	 */
 	public function __construct( $url = null, $sanitize = true, $fetch = false )
 	{
@@ -1498,7 +1510,7 @@ class HTML_PageExcerpt_Url extends HTML_PageExcerpt_Object
 	public function isAbsolute( $str = null )
 	{
 		$str = ($str === null) ? $this->url : $str;
-		return (bool) preg_match( '@^(' . implode( '|', $this->_recognizedSchemes ) . ')://.+$@i', $str );
+		return (bool) preg_match( '@^(' . implode( '|', $this->_validSchemes ) . ')://.+$@i', $str );
 	} // isAbsolute }}}
 
 
@@ -1780,25 +1792,26 @@ class HTML_PageExcerpt_Utils
 	} // mimetypeToExtension }}}
 
 
+	/**
+	 * Enter description here ...
+	 *
+	 * @param	string $extension
+	 * @return	string
+	 */
 	public static function extensionToMimetype( $extension )
 	{
 		return Mimex::extensionToMimetype( $extension );
 	} // extensionToMimetype }}}
 
 
+	/**
+	 * Enter description here ...
+	 *
+	 * @param	string $filename
+	 * @return	string
+	 */
 	public static function fileDetectMimetype( $filename )
 	{
-		/*static $finfo;
-
-		if (! $finfo) {
-			$finfo = new finfo( FILEINFO_MIME_TYPE );
-		}
-		$mimetype = $finfo->file( $filename);
-		// fix erroneous mimetype for favicons
-		if ($mimetype === 'image/x-ico') {
-			$mimetype = 'image/x-icon';
-		}
-		return $mimetype;*/
 		return Mimex::mimetype( $filename, true );
 	} // fileDetectMimetype }}}
 
@@ -1825,153 +1838,6 @@ class HTML_PageExcerpt_Utils
 		}
 		return $innerHTML;
 	} // DOMinnerHTML }}}
-
-
-	/**
-	 * Enter description here ...
-	 * 
-	 * @return array
-	 */
-	/*public static function sysExtensionMimetypes()
-	{
-		$mimeMap = self::_getMimetypesMap();
-		# Returns the system MIME type mapping of extensions to MIME types, as defined in /etc/mime.types.
-		$out = array();
-		$file = fopen( self::$sysMimetypesMap, 'r' );
-		while ( ($line = fgets( $file )) !== false ) {
-			$line = trim( preg_replace( '@#.*@', '', $line ) );
-			if (! $line) {
-				continue;
-			}
-			$parts = preg_split( '@\s+@', $line );
-			if (count( $parts ) == 1) {
-				continue;
-			}
-			$type = array_shift( $parts );
-			foreach ( $parts as $part ) {
-				$out[$part] = $type;
-			}
-		}
-		fclose( $file );
-		return $out;
-	} // sysExtensionMimetypes }}}*/
-
-
-	/**
-	 * Enter description here ...
-	 * 
-	 * @param string $file
-	 * @return string
-	 */
-	/*public static function sysExtensionToMimetype( $file )
-	{
-		# Returns the system MIME type (as defined in /etc/mime.types) for the filename specified.
-		#
-		# $file - the filename to examine
-		static $types;
-		if (! isset( $types )) {
-			$types = self::sysExtensionMimetypes();
-		}
-		$ext = pathinfo( $file, PATHINFO_EXTENSION );
-		if (! $ext) {
-			$ext = $file;
-		}
-		$ext = strtolower( $ext );
-		return isset( $types[$ext] ) ? $types[$ext] : null;
-	} // sysExtensionToMimetype }}}*/
-
-
-	/**
-	 * Enter description here ...
-	 * 
-	 * @return array
-	 */
-	/*public static function sysMimetypeExtensions()
-	{
-		$mimeMap = self::_getMimetypesMap();
-		# Returns the system MIME type mapping of MIME types to extensions, as defined in /etc/mime.types (considering the first
-		# extension listed to be canonical).
-		$out = array();
-		$file = fopen( $mimeMap, 'r' );
-		while ( ($line = fgets( $file )) !== false ) {
-			$line = trim( preg_replace( '@#.*@', '', $line ) );
-			if (! $line) {
-				continue;
-			}
-			$parts = preg_split( '@\s+@', $line );
-			if (count( $parts ) == 1) {
-				continue;
-			}
-			$type = array_shift( $parts );
-			if (! isset( $out[$type] )) {
-				$out[$type] = array_shift( $parts );
-			}
-		}
-		fclose( $file );
-		return $out;
-	} // sysMimetypeExtensions }}}*/
-
-
-	/**
-	 * Enter description here ...
-	 * 
-	 * @param string $type
-	 * @return string
-	 */
-	/*public static function sysMimetypeToExtension( $type )
-	{
-		# Returns the canonical file extension for the MIME type specified, as defined in /etc/mime.types (considering the first
-		# extension listed to be canonical).
-		#
-		# $type - the MIME type
-		static $exts;
-		if (! isset( $exts )) {
-			$exts = self::sysMimetypeExtensions();
-		}
-		$extension = isset( $exts[$type] ) ? $exts[$type] : null;
-		// prefer jpg over jpeg
-		if ($extension === 'jpeg') {
-			$extension = 'jpg';
-		}
-		return $extension;
-	} // sysMimetypeToExtension }}}*/
-
-
-	/**
-	 * Enter description here ...
-	 * 
-	 * @return array
-	 * @throws HTML_PageExcerpt_FatalException
-	 */
-	/*protected static function _getMimetypesMap()
-	{
-		static $checked = false;
-		
-		$mimetypesMap = HTML_PageExcerpt_Settings::get( 'mimetypes_map_path' );
-		if (! $checked) {
-			if (! is_file( $mimetypesMap )) {
-				throw new HTML_PageExcerpt_FatalException( "System mimetypes map not found '$mimetypesMap'" );
-			}
-			if (! is_readable( $mimetypesMap )) {
-				throw new HTML_PageExcerpt_FatalException( "System mimetypes map not readable '$mimetypesMap'" );
-			}
-			$checked = true;
-		}
-		
-		return $mimetypesMap;
-	} // _getMimetypesMap }}}*/
-
-
-	/**
-	 * Enter description here ...
-	 * 
-	 * @return bool
-	 */
-	/*public static function isWindows()
-	{
-		// praize to god it returns false :)
-		return (strtoupper( substr( PHP_OS, 0, 3 ) ) === 'WIN');
-	} // isWindows }}}*/
 
 
 	/**

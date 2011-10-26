@@ -25,7 +25,9 @@ class HTML_PageExcerpt_Tests
 	 */
 	public function run( $urls = null )
 	{
-
+		if (is_string( $urls )) {
+			$urls = array( $urls );
+		}
 		$_urls = array( 
 				'http://vimeo.com/24997574', 
 				'http://circuspt.blogs.sapo.pt/276442.html', 
@@ -76,6 +78,6 @@ error_reporting( E_ALL );
 $config = null;
 //$config = array( 'fetcher_user_agent' => 'fake' );
 $tests = new HTML_PageExcerpt_Tests( $config );
-$tests->run();
+$tests->run('http://www.publico.pt/Tecnologia/nova-legislacao-para-combate-a-pirataria-no-prazo-maximo-de-um-ano_1500632');
 
 ?>
