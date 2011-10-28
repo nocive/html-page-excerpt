@@ -29,7 +29,7 @@ class HTML_PageExcerpt_Settings
 	 * @access	public
 	 */
 	public static $settings = array( 
-			'logging' => true, 
+			'logging' => false, 
 			'logfile' => HTML_PAGEEXCERPT_LOGFILE, 
 			'encoding' => 'UTF-8', 
 			
@@ -58,6 +58,7 @@ class HTML_PageExcerpt_Settings
 			'excerpt_search_tags' => array( 
 					'meta og:description', 
 					'meta description', 
+					'article section',
 					'p' 
 			), 
 			'excerpt_seo_tags_ignore_filters' => true,
@@ -512,8 +513,8 @@ class HTML_PageExcerpt extends HTML_PageExcerpt_Object
 			$html = mb_convert_encoding( $html, 'HTML-ENTITIES', $toEncoding );
 		}
 
-		// remove script and style tags
-		$html = preg_replace( '@<\s*\b(script|style)\b[^>]*>(.*?)<\s*\/\s*(script|style)\s*>@is', '', $html );
+		// remove script, style and iframe tags
+		$html = preg_replace( '@<\s*\b(script|style|iframe)\b[^>]*>(.*?)<\s*\/\s*(script|style|iframe)\s*>@is', '', $html );
 
 		// replace some utf8 weirdness (probably from office cpy&paste)
 		$html = str_replace( array(
@@ -661,6 +662,18 @@ class HTML_PageExcerpt extends HTML_PageExcerpt_Object
 				foreach ( $elements as $elem ) {
 					$candidate = new HTML_PageExcerpt_Text( $elem->nodeValue );
 					if (! $candidate->isEmpty() && ($SEO_ignFilters || $candidate->matches( $this->_getFilterOpts( 'excerpt' ) ))) {
+						// found
+						$excerpt = $candidate;
+						break 3;
+					}
+				}
+				break;
+			case 'article section':
+				// new html5 method
+				$elements = $this->_xpath->query( '/html/body//article/section' );
+				foreach ( $elements as $elem ) {
+					$candidate = new HTML_PageExcerpt_Text( $elem->nodeValue );
+					if ($candidate->matches( $this->_getFilterOpts( 'excerpt' ) )) {
 						// found
 						$excerpt = $candidate;
 						break 3;

@@ -78,6 +78,7 @@ error_reporting( E_ALL );
 $config = null;
 //$config = array( 'fetcher_user_agent' => 'fake' );
 $tests = new HTML_PageExcerpt_Tests( $config );
-$tests->run();
+$tests->run('http://campus.beta.sapo.pt/blog/softwareismodernart');
+//$tests->run('http://campus.beta.sapo.pt/blog/softwareismodernart/1375');
 
 ?>
