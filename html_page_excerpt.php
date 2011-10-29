@@ -76,6 +76,7 @@ class HTML_PageExcerpt_Settings
 			'thumbnails_min_height' => 100, 
 			'thumbnails_max_width' => 0, 
 			'thumbnails_max_height' => 0, 
+			// FIXME it's not clear what this does...
 			'thumbnails_max_tries' => 10, 
 			'thumbnails_min_size' => 0, 
 			'thumbnails_max_size' => 0, 
@@ -755,7 +756,7 @@ class HTML_PageExcerpt extends HTML_PageExcerpt_Object
 				$candidate = new HTML_PageExcerpt_Image( $elem->nodeValue );
 				$candidate->url->absolutize( $this->url );
 				
-				if (! $candidate->url->isValid() || $this->_isUrlBlacklisted( 'thumbnails', $this->url )) {
+				if (! $candidate->url->isValid() || $this->_isUrlBlacklisted( 'thumbnails', $candidate->url )) {
 					continue;
 				}
 				$thumbs[] = $candidate;
