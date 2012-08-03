@@ -4,7 +4,7 @@ namespace HTMLPageExcerpt;
 
 class Log
 {
-	const LEVEL_DEBUG = 'debug';;
+	const LEVEL_DEBUG = 'debug';
 	const LEVEL_NOTICE = 'notice';
 	const LEVEL_WARNING = 'warning';
 	const LEVEL_ERROR = 'error';
@@ -25,8 +25,8 @@ class Log
 	 * @param	string $str
 	 * @param	string $level
 	 * @param	bool $appendNewLine
-	 * @throws	\HTMLPageExcerpt\FatalException
-	 * @throws	\HTMLPageExcerpt\FileReadWriteException
+	 * @throws	FatalException
+	 * @throws	FileReadWriteException
 	 * @return	bool
 	 */
 	public static function write( $logfile, $str, $level, $appendNewline = true )

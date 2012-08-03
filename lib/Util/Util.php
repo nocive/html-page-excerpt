@@ -1,5 +1,11 @@
 <?php
 
+/**
+ * Utilities class
+ *
+ * @package	HTML_PageExcerpt
+ * @subpackage	Utils
+ */
 namespace HtmlPageExcerpt;
 
 class Util
@@ -59,7 +65,7 @@ class Util
 	 */
 	public static function mimetypeToExtension( $mimetype )
 	{
-		//return Mimex::mimetypeToExtension( $mimetype );
+		return \Mimex::mimetypeToExtension( $mimetype );
 	} // mimetypeToExtension }}}
 
 
@@ -71,7 +77,7 @@ class Util
 	 */
 	public static function extensionToMimetype( $extension )
 	{
-		//return Mimex::extensionToMimetype( $extension );
+		return \Mimex::extensionToMimetype( $extension );
 	} // extensionToMimetype }}}
 
 
@@ -83,7 +89,7 @@ class Util
 	 */
 	public static function fileDetectMimetype( $filename )
 	{
-		//return Mimex::mimetype( $filename, true );
+		return \Mimex::mimetype( $filename, true );
 	} // fileDetectMimetype }}}
 
 
@@ -91,21 +97,21 @@ class Util
 	 * Enter description here ...
 	 * 
 	 * @param	DOMNode
-	 * @throws	HTML_PageExcerpt_InvalidArgumentException
+	 * @throws	\InvalidArgumentException
 	 * @return	string
 	 */
 	public static function DOMinnerHTML( $element )
 	{
 		if (! $element instanceof DOMNode) {
-			throw new HTML_PageExcerpt_InvalidArgumentException( 'Supplied element is not a DOMNode instance' );
+			throw new \InvalidArgumentException( 'Supplied element is not a DOMNode instance' );
 		}
 
 		$innerHTML = '';
 		$children = $element->childNodes;
 		foreach ( $children as $child ) {
-			$tmp_dom = new DOMDocument();
-			$tmp_dom->appendChild( $tmp_dom->importNode( $child, true ) );
-			$innerHTML .= trim( $tmp_dom->saveHTML() );
+			$tmpDom = new DOMDocument();
+			$tmpDom->appendChild( $tmpDom->importNode( $child, true ) );
+			$innerHTML .= trim( $tmpDom->saveHTML() );
 		}
 		return $innerHTML;
 	} // DOMinnerHTML }}}

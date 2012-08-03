@@ -187,13 +187,13 @@ class Config
 			if (is_array( $args[0] )) {
 				$args = $args[0];
 			} else {
-				return $this->_config[$args[0]];
+				return isset( $this->_config[$args[0]] ) ? $this->_config[$args[0]] : null;
 			}
 		}
 
 		$return = array();
 		foreach ( $args as $a ) {
-			$return[$a] = $this->_config[$a];
+			$return[$a] = isset( $this->_config[$a] ) ? $this->_config[$a] : null;
 		}
 		return $return;
 	}
