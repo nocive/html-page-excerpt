@@ -129,8 +129,6 @@ class Image extends Object
 	 */
 	public function __destruct()
 	{
-		parent::__destruct();
-
 		if ($this->_tmpfilename) {
 			@unlink( $this->_tmpfilename );
 		}
@@ -151,12 +149,12 @@ class Image extends Object
 		}
 
 		$this->url->fetch();
-		$this->_tmpfilename = Utils::tempFilename( self::TEMPFILE_PREFIX );
+		$this->_tmpfilename = Util::tempFilename( self::TEMPFILE_PREFIX );
 		$this->url->save( $this->_tmpfilename );
 		// free some memory
 		unset( $this->url->content );
 
-		$this->mimetype = Utils::fileDetectMimetype( $this->_tmpfilename );
+		$this->mimetype = Util::fileDetectMimetype( $this->_tmpfilename );
 		if (strpos( $this->mimetype, 'image/' ) !== 0) {
 			throw new InvalidImageFileException( 'File is not a valid image' );
 		}
@@ -206,7 +204,7 @@ class Image extends Object
 
 			$mimetypes_include = array();
 			foreach ( $extensions_include as $ext ) {
-				$mime = Utils::extensionToMimetype( $ext );
+				$mime = Util::extensionToMimetype( $ext );
 				if (! empty( $mime )) {
 					$mimetypes_include[] = $mime;
 				}
@@ -220,7 +218,7 @@ class Image extends Object
 
 			$mimetypes_exclude = array();
 			foreach ( $extensions_exclude as $ext ) {
-				$mime = Utils::extensionToMimetype( $ext );
+				$mime = Util::extensionToMimetype( $ext );
 				if (! empty( $mime )) {
 					$mimetypes_exclude[] = $mime;
 				}

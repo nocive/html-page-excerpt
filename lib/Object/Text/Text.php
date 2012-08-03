@@ -44,7 +44,7 @@ class Text extends Object
 			return $this->content;
 		}
 
-		$this->content = Utils::substrw( $this->content, $length, $terminator );
+		$this->content = Util::substrw( $this->content, $length, $terminator );
 		return $this->content;
 	} // _truncate }}}
 
@@ -77,7 +77,7 @@ class Text extends Object
 	 */
 	public function sanitize( $str )
 	{
-		//HTML_PageExcerpt_Utils::hexDump( $str );
+		//Util::hexDump( $str );
 
 		// add a space if a tag is present right next to a word
 		$str = preg_replace( '@([^\s]+)(<[^>]+>)@', '\\1 \\2', $str );

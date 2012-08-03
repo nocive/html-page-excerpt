@@ -75,10 +75,10 @@ class Config
 		self::ENCODING => 'UTF-8', 
 
 		self::FETCHER_PROXY => '', 
-		self::FETCHER_TIMEOUT => 60, 
+		self::FETCHER_TIMEOUT => 20, 
 		self::FETCHER_FOLLOW_LOCATION => true, 
 		self::FETCHER_MAX_REDIRS => 2, 
-		self::FETCHER_USER_AGENT => 'Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/534.24 (KHTML, like Gecko) Chrome/11.0.696.71 Safari/534.24', 
+		self::FETCHER_USER_AGENT => 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.1 (KHTML, like Gecko) Chrome/21.0.1180.57 Safari/537.1', 
 		self::FETCHER_FAKE_REFERER => true, 
 
 		self::TITLE_SEARCH_TAGS => array(
@@ -173,7 +173,7 @@ class Config
 	/**
 	 * Retrieve configuration parameters
 	 *
-	 * @param	string $var1, $var2, $varX
+	 * @param	string $var, $varX
 	 * @return	mixed
 	 */
 	public function get()

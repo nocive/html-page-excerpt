@@ -24,7 +24,16 @@ class Bootstrap
 		'Base' => 'Base/Base',
 		'Config' => 'Config/Config',
 		'Object' => 'Object/Object',
-		'Util' => 'Util/Util'
+		'Url' => 'Object/Url/Url',
+		'Text' => 'Object/Text/Text',
+		'Image' => 'Object/Image/Image',
+		'Util' => 'Util/Util',
+		'Log' => 'Log/Log',
+		'Exception' => 'Exception/Exception',
+		'CommunicationException' => 'Exception/Exception',
+		'FileReadWriteException' => 'Exception/Exception',
+		'InvalidImageFileException' => 'Exception/Exception',
+		'FatalException' => 'Exception/Exception'
 	);
 
 	/**
@@ -43,7 +52,7 @@ class Bootstrap
 	 * @access public
 	 */
 	protected static $_dependencies = array(
-		'Externals/Mimex/Mimex.php'
+		'Externals/Mimex/mimex.php'
 	);
 
 	/**

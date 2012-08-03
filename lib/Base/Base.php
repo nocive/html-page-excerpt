@@ -35,10 +35,10 @@ abstract class Base
 	 */
 	public function log( $str, $level = Log::LEVEL_DEBUG, $logfile = null )
 	{
-		$cfgClass = $this->_config;
-		$logfile = $logfile !== null ? $this->_config->get( $cfgClass::LOGFILE ) : $logfile;
+		$config = $this->_config;
+		$logfile = $logfile === null ? $config->get( $config::LOGFILE ) : $logfile;
 
-		if ($this->_config->get( $cfgClass::LOG ) && ! empty( $logfile )) {
+		if ($config->get( $config::LOG ) && ! empty( $logfile )) {
 			return Log::write( $logfile, $str, $level );
 		}
 		return false;

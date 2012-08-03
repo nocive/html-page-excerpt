@@ -102,14 +102,14 @@ class Util
 	 */
 	public static function DOMinnerHTML( $element )
 	{
-		if (! $element instanceof DOMNode) {
+		if (! $element instanceof \DOMNode) {
 			throw new \InvalidArgumentException( 'Supplied element is not a DOMNode instance' );
 		}
 
 		$innerHTML = '';
 		$children = $element->childNodes;
 		foreach ( $children as $child ) {
-			$tmpDom = new DOMDocument();
+			$tmpDom = new \DOMDocument();
 			$tmpDom->appendChild( $tmpDom->importNode( $child, true ) );
 			$innerHTML .= trim( $tmpDom->saveHTML() );
 		}

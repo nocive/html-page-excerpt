@@ -11,11 +11,6 @@ namespace HTMLPageExcerpt;
 class Url extends Object
 {
 	/**
-	 * @constant	string
-	 */
-	const URL_PARTS = 'scheme,host,port,user,pass,path,query,fragment';
-
-	/**
 	 * @var		string
 	 * @access	public
 	 */
@@ -60,13 +55,28 @@ class Url extends Object
 			'https' 
 	);
 
+	/**
+	 * @var		array
+	 * @access	protected
+	 */
+	protected $_urlParts = array(
+		'scheme' => '',
+		'host' => '',
+		'port' => '',
+		'user' => '',
+		'pass' => '',
+		'query' => '',
+		'fragment' => ''
+	);
+
 
 	/**
 	 * Enter description here ...
 	 * 
-	 * @param	string $url	optional
-	 * @param	bool $sanitize	optional
-	 * @param	bool $fetch	optional
+	 * @param	string $url		optional
+	 * @param	bool $sanitize		optional
+	 * @param	bool $fetch		optional
+	 * @param	Config|array $config
 	 */
 	public function __construct( $url = null, $sanitize = true, $fetch = false, $config = null )
 	{
@@ -108,7 +118,7 @@ class Url extends Object
 	 */
 	public function absolutize( $base )
 	{
-		if (! $this->isAbsolute( $base )) {
+		if (! is_string( $base ) || ! $this->isAbsolute( $base )) {
 			throw new \InvalidArgumentException( "Supplied base url '$base' is not a valid absolute url" );
 		}
 
@@ -120,11 +130,10 @@ class Url extends Object
 		// queries and anchors
 		if ($url[0] == '#' || $url[0] == '?') {
 			$url = $base . $url;
-			$this->url = $url;
-			return $url;
+			return $this->url = $url;
 		}
 
-		extract( array_merge( explode( ',', self::URL_PARTS ), parse_url( $base ) ) );
+		extract( array_merge( $this->_urlParts, parse_url( $base ) ) );
 
 		// remove non-directory element from path
 		$path = preg_replace( '@/[^/]*$@', '', $path );
@@ -146,8 +155,7 @@ class Url extends Object
 		}
 
 		$url = $scheme . '://' . $abs;
-		$this->url = $url;
-		return $url;
+		return $this->url = $url;
 	} // absolutize }}}
 
 
@@ -188,48 +196,50 @@ class Url extends Object
 			throw new \InvalidArgumentException( "Url '{$this->url}' is not a valid absolute url" );
 		}
 
-		$cfgClass = $this->_config;
+		$config = $this->_config;
 		$opts = array(
-			$cfgClass::FETCHER_TIMEOUT => $this->_config->get( $cfgClass::FETCHER_TIMEOUT ),
-			$cfgClass::FETCHER_USER_AGENT => $this->_config->get( $cfgClass::FETCHER_USER_AGENT ),
-			$cfgClass::FETCHER_FOLLOW_LOCATION => $this->_config->get( $cfgClass::FETCHER_FOLLOW_LOCATION ),
-			$cfgClass::FETCHER_MAX_REDIRS => $this->_config->get( $cfgClass::FETCHER_MAX_REDIRS ),
-			$cfgClass::FETCHER_PROXY => $this->_config->get( $cfgClass::FETCHER_PROXY ),
-			$cfgClass::FETCHER_FAKE_REFERER => $this->_config->get( $cfgClass::FETCHER_FAKE_REFERER ),
+			$config::FETCHER_TIMEOUT => $config->get( $config::FETCHER_TIMEOUT ),
+			$config::FETCHER_USER_AGENT => $config->get( $config::FETCHER_USER_AGENT ),
+			$config::FETCHER_FOLLOW_LOCATION => $config->get( $config::FETCHER_FOLLOW_LOCATION ),
+			$config::FETCHER_MAX_REDIRS => $config->get( $config::FETCHER_MAX_REDIRS ),
+			$config::FETCHER_PROXY => $config->get( $config::FETCHER_PROXY ),
+			$config::FETCHER_FAKE_REFERER => $config->get( $config::FETCHER_FAKE_REFERER ),
 		);
 
 		$this->_curl = curl_init();
 		curl_setopt( $this->_curl, CURLOPT_URL, $this->url );
 		curl_setopt( $this->_curl, CURLOPT_RETURNTRANSFER, true );
-		if (isset( $opts[$cfgClass::FETCHER_TIMEOUT] )) {
-			curl_setopt( $this->_curl, CURLOPT_CONNECTTIMEOUT, $opts[$cfgClass::FETCHER_TIMEOUT] );
+		if (isset( $opts[$config::FETCHER_TIMEOUT] )) {
+			curl_setopt( $this->_curl, CURLOPT_CONNECTTIMEOUT, $opts[$config::FETCHER_TIMEOUT] );
 		}
-		if (! empty( $opts[$cfgClass::FETCHER_USER_AGENT] )) {
-			curl_setopt( $this->_curl, CURLOPT_USERAGENT, $opts[$cfgClass::FETCHER_USER_AGENT] );
+		if (! empty( $opts[$config::FETCHER_USER_AGENT] )) {
+			curl_setopt( $this->_curl, CURLOPT_USERAGENT, $opts[$config::FETCHER_USER_AGENT] );
 		}
-		if (isset( $opts[$cfgClass::FETCHER_FOLLOW_LOCATION] )) {
-			curl_setopt( $this->_curl, CURLOPT_FOLLOWLOCATION, $opts[$cfgClass::FETCHER_FOLLOW_LOCATION] );
+		if (isset( $opts[$config::FETCHER_FOLLOW_LOCATION] )) {
+			curl_setopt( $this->_curl, CURLOPT_FOLLOWLOCATION, $opts[$config::FETCHER_FOLLOW_LOCATION] );
 		}
-		if (isset( $opts[$cfgClass::FETCHER_MAX_REDIRS] )) {
-			curl_setopt( $this->_curl, CURLOPT_MAXREDIRS, $opts[$cfgClass::FETCHER_MAX_REDIRS] );
+		if (isset( $opts[$config::FETCHER_MAX_REDIRS] )) {
+			curl_setopt( $this->_curl, CURLOPT_MAXREDIRS, $opts[$config::FETCHER_MAX_REDIRS] );
 		}
 		curl_setopt( $this->_curl, CURLOPT_SSL_VERIFYPEER, false );
-		if (! empty( $opts[$cfgClass::FETCHER_PROXY] )) {
-			curl_setopt( $this->_curl, CURLOPT_PROXY, $opts[$cfgClass::FETCHER_PROXY] );
+		if (! empty( $opts[$config::FETCHER_PROXY] )) {
+			curl_setopt( $this->_curl, CURLOPT_PROXY, $opts[$config::FETCHER_PROXY] );
 		}
-		if (isset( $opts[$cfgClass::FETCHER_FAKE_REFERER] )) {
+		if (isset( $opts[$config::FETCHER_FAKE_REFERER] )) {
 			curl_setopt( $this->_curl, CURLOPT_REFERER, $this->url );
 		}
+
+//		curl_setopt( $this->_curl, CURLOPT_VERBOSE, true );
 
 		$logstr = sprintf(
 			'-- fetching url %s, timeout: %s, ua: %s, follow_loc: %s, max_redirs: %s, proxy: %s, fake_ref: %s', 
 			$this->url,
-			$opts[$cfgClass::FETCHER_TIMEOUT],
-			$opts[$cfgClass::FETCHER_USER_AGENT],
-			$opts[$cfgClass::FETCHER_FOLLOW_LOCATION] ? 'y' : 'n',
-			$opts[$cfgClass::FETCHER_MAX_REDIRS],
-			$opts[$cfgClass::FETCHER_PROXY],
-			$opts[$cfgClass::FETCHER_FAKE_REFERER] ? 'y' : 'n'
+			$opts[$config::FETCHER_TIMEOUT],
+			$opts[$config::FETCHER_USER_AGENT],
+			$opts[$config::FETCHER_FOLLOW_LOCATION] ? 'y' : 'n',
+			$opts[$config::FETCHER_MAX_REDIRS],
+			$opts[$config::FETCHER_PROXY],
+			$opts[$config::FETCHER_FAKE_REFERER] ? 'y' : 'n'
 		);
 		$this->log( $logstr );
 
@@ -238,7 +248,7 @@ class Url extends Object
 		$httpStatusCode = curl_getinfo( $this->_curl, CURLINFO_HTTP_CODE );
 		$contentType = curl_getinfo( $this->_curl, CURLINFO_CONTENT_TYPE );
 
-		$this->log( sprintf( '-- fetched, took: %s', round( (float) microtime( true ) - (float) $fetchStart ), 2 ) );
+		$this->log( sprintf( '-- fetched, took: %s', round( (float) microtime( true ) - (float) $fetchStart, 2 ) ) );
 
 		$encoding = null;
 		$matches = array();
