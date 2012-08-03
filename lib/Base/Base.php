@@ -24,13 +24,14 @@ abstract class Base
 		} else {
 			$this->_config = new Config( $config );
 		}
-	}	
+	} // __construct }}}
 
 	/**
 	 * Enter description here ...
 	 * 
 	 * @param	string $str
 	 * @param	string $level
+	 * @param	string|null $logfile
 	 * @return	bool
 	 */
 	public function log( $str, $level = Log::LEVEL_DEBUG, $logfile = null )
@@ -42,5 +43,5 @@ abstract class Base
 			return Log::write( $logfile, $str, $level );
 		}
 		return false;
-	}
+	} // log }}}
 }

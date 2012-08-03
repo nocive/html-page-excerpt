@@ -11,37 +11,37 @@ namespace HTMLPageExcerpt;
 class Image extends Object
 {
 	/**
-	 * @constant string
+	 * @constant	string
 	 */
 	const TEMPFILE_PREFIX = 'peimg_';
 
 	/**
-	 * @constant string
+	 * @constant	string
 	 */
 	const FIELD_URL = 'url';
 
 	/**
-	 * @constant string
+	 * @constant	string
 	 */
 	const FIELD_WIDTH = 'width';
 
 	/**
-	 * @constant string
+	 * @constant	string
 	 */
 	const FIELD_HEIGHT = 'height';
 
 	/**
-	 * @constant string
+	 * @constant	string
 	 */
 	const FIELD_MIMETYPE = 'mimetype';
 
 	/**
-	 * @constant string
+	 * @constant	string
 	 */
 	const FIELD_EXTENSION = 'extension';
 
 	/**
-	 * @constant string
+	 * @constant	string
 	 */
 	const FIELD_SIZE = 'size';
 
@@ -108,7 +108,7 @@ class Image extends Object
 
 
 	/**
-	 * Enter description here ...
+	 * Class constructor
 	 * 
 	 * @param	string $url
 	 * @param	bool $identify	optional
@@ -125,7 +125,7 @@ class Image extends Object
 
 
 	/**
-	 * Enter description here ...
+	 * Class destructor
 	 */
 	public function __destruct()
 	{
@@ -140,7 +140,6 @@ class Image extends Object
 	 * 
 	 * @throws	InvalidImageFileException
 	 * @throws	FatalException
-	 * @return	void
 	 */
 	public function identify()
 	{

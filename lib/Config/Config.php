@@ -168,7 +168,7 @@ class Config
 	{
 		$cfg = $cfg !== null ? array_merge( self::$_defaults, $cfg ) : self::$_defaults;
 		$this->set( $cfg );
-	}
+	} // __construct }}}
 
 	/**
 	 * Retrieve configuration parameters
@@ -196,7 +196,7 @@ class Config
 			$return[$a] = isset( $this->_config[$a] ) ? $this->_config[$a] : null;
 		}
 		return $return;
-	}
+	} // get }}}
 
 	/**
 	 * Set configuration parameters
@@ -224,7 +224,7 @@ class Config
 				$this->_config[$var] = $value;
 			}
 		}
-	}
+	} // set }}}
 
 	/**
 	 * Reset configuration to it's initial state
@@ -232,6 +232,6 @@ class Config
 	public function reset()
 	{
 		$this->set( self::$_defaults );
-	}
+	} // reset }}}
 }
 

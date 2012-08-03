@@ -10,15 +10,41 @@ namespace HTMLPageExcerpt;
 
 class Bootstrap
 {
+	/**
+	 * @constant	string
+	 */
 	const PHP_MIN_VERSION = '5.3.0';
 
+	/**
+	 * @constant	string
+	 */
 	const PHPEXT_CURL = 'curl';
+
+	/**
+	 * @constant	string
+	 */
 	const PHPEXT_DOM = 'dom';
+
+	/**
+	 * @constant	string
+	 */
 	const PHPEXT_ICONV = 'iconv';
+
+	/**
+	 * @constant	string
+	 */
 	const PHPEXT_FILEINFO = 'fileinfo';
 
+	/**
+	 * @constant	string
+	 */
 	const CLASS_EXTENSION = '.php';
 
+	
+	/**
+	 * @var		array
+	 * @access	public
+	 */
 	public static $classmap = array(
 		'HTMLPageExcerpt' => 'HTMLPageExcerpt',
 		'Base' => 'Base/Base',

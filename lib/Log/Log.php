@@ -1,15 +1,44 @@
 <?php
 
+/**
+ * Log class
+ *
+ * @package	HTMLPageExcerpt
+ * @subpackage	Log
+ */
 namespace HTMLPageExcerpt;
 
 class Log
 {
+	/**
+	 * @constant	string
+	 */
 	const LEVEL_DEBUG = 'debug';
+
+	/**
+	 * @constant	string
+	 */
 	const LEVEL_NOTICE = 'notice';
+
+	/**
+	 * @constant	string
+	 */
 	const LEVEL_WARNING = 'warning';
+
+	/**
+	 * @constant	string
+	 */
 	const LEVEL_ERROR = 'error';
+
+	/**
+	 * @constant	string
+	 */
 	const LEVEL_CRITICAL = 'critical';
 
+	/**
+	 * @var		array
+	 * @access	protected
+	 */
 	protected static $_levels = array(
 		self::LEVEL_DEBUG,
 		self::LEVEL_NOTICE,
