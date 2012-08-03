@@ -17,6 +17,11 @@ abstract class Base
 	protected $_config;
 
 
+	/**
+	 * Class constructor
+	 *
+	 * @param	Config|array
+	 */
 	public function __construct( $config )
 	{
 		if ($config instanceof Config) {
@@ -27,11 +32,37 @@ abstract class Base
 	} // __construct }}}
 
 	/**
+	 * Get config class instance
+	 *
+	 * @return	Config
+	 */
+	public function getConfig()
+	{
+		return $this->_config;
+	} // getConfig }}}
+
+	/**
+	 * Set config class instance
+	 *
+	 * @param	$config Config
+	 * @throws	\InvalidArgumentException
+	 * @return	Base
+	 */
+	public function setConfig( $config )
+	{
+		if (! $config instanceof Config) {
+			throw new \InvalidArgumentException( '$config must be an instance of Config' );
+		}
+		$this->_config = $config;
+		return $this;
+	} // setConfig }}}
+
+	/**
 	 * Enter description here ...
 	 * 
 	 * @param	string $str
-	 * @param	string $level
-	 * @param	string|null $logfile
+	 * @param	string $level		optional
+	 * @param	string|null $logfile	optional
 	 * @return	bool
 	 */
 	public function log( $str, $level = Log::LEVEL_DEBUG, $logfile = null )

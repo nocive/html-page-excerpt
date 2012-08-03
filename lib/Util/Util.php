@@ -120,8 +120,8 @@ class Util
 	/**
 	 * Enter description here ...
 	 * 
-	 * @param string $data
-	 * @param string $newline
+	 * @param	string $data
+	 * @param	string $newline
 	 */
 	public static function hexDump( $data, $newline = "\n" )
 	{

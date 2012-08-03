@@ -196,7 +196,8 @@ class Url extends Object
 			throw new \InvalidArgumentException( "Url '{$this->url}' is not a valid absolute url" );
 		}
 
-		$config = $this->_config;
+		$config = $this->getConfig();
+
 		$opts = array(
 			$config::FETCHER_TIMEOUT => $config->get( $config::FETCHER_TIMEOUT ),
 			$config::FETCHER_USER_AGENT => $config->get( $config::FETCHER_USER_AGENT ),
@@ -229,7 +230,7 @@ class Url extends Object
 			curl_setopt( $this->_curl, CURLOPT_REFERER, $this->url );
 		}
 
-//		curl_setopt( $this->_curl, CURLOPT_VERBOSE, true );
+		//curl_setopt( $this->_curl, CURLOPT_VERBOSE, true );
 
 		$logstr = sprintf(
 			'-- fetching url %s, timeout: %s, ua: %s, follow_loc: %s, max_redirs: %s, proxy: %s, fake_ref: %s', 

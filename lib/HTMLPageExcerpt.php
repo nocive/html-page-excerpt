@@ -235,8 +235,6 @@ class HTMLPageExcerpt extends Base
 
 	/**
 	 * Enter description here ...
-	 *
-	 * @return	void
 	 */
 	public function reset()
 	{
@@ -255,11 +253,10 @@ class HTMLPageExcerpt extends Base
 	 * Enter description here ...
 	 * 
 	 * @param	string $html
-	 * @return	void
 	 */
 	protected function _loadDocument( $html )
 	{
-		$config = $this->_config;
+		$config = $this->getConfig();
 
 		$dom = new \DOMDocument();
 		$dom->preserveWhitespace = false;
@@ -282,12 +279,12 @@ class HTMLPageExcerpt extends Base
 	/**
 	 * Enter description here ...
 	 * 
-	 * @param	DOMDocument $dom
+	 * @param	\DOMDocument $dom
 	 * @return	string
 	 */
 	protected function _getEncoding( &$dom )
 	{
-		$config = $this->_config;
+		$config = $this->getConfig();
 
 		// get encoding from announced http content type header, if any
 		if (! empty( $this->url->encoding )) {
@@ -370,6 +367,7 @@ class HTMLPageExcerpt extends Base
 	{
 		$what = strtolower( $what );
 		if (in_array( $what, $this->_fields )) {
+			// return if already cached
 			if (isset( $this->{$what} ) && $this->{$what} !== null) {
 				return $this->{$what};
 			}
@@ -386,7 +384,8 @@ class HTMLPageExcerpt extends Base
 	 */
 	protected function _findTitle()
 	{
-		$config = $this->_config;
+		$config = $this->getConfig();
+
 		$title = null;
 		$SEO_ignFilters = $config->get( $config::TITLE_SEO_TAGS_IGNORE_FILTERS );
 
@@ -442,7 +441,8 @@ class HTMLPageExcerpt extends Base
 	 */
 	protected function _findExcerpt()
 	{
-		$config = $this->_config;
+		$config = $this->getConfig();
+
 		$excerpt = null;
 		$SEO_ignFilters = $config->get( $config::EXCERPT_SEO_TAGS_IGNORE_FILTERS );
 
@@ -520,7 +520,8 @@ class HTMLPageExcerpt extends Base
 	 */
 	protected function _findThumbs()
 	{
-		$config = $this->_config;
+		$config = $this->getConfig();
+
 		$SEO_ignFilters = $config->get( $config::THUMBS_SEO_TAGS_IGNORE_FILTERS );
 		$thumbnails = array();
 		$tries = 0;
@@ -657,9 +658,9 @@ class HTMLPageExcerpt extends Base
 	 */
 	protected function _isUrlBlacklisted( $type, $url )
 	{
-		$config = $this->_config;
-		$type = strtoupper( $type );
+		$config = $this->getConfig();
 
+		$type = strtoupper( $type );
 		$constantName = get_class( $config ) . "::{$type}_URL_BLACKLIST";
 		$blacklistPattern = $config->get( constant( $constantName ) );
 		if (empty( $blacklistPattern )) {
@@ -679,7 +680,7 @@ class HTMLPageExcerpt extends Base
 	 */
 	protected function _getFilterOpts( $type )
 	{
-		$config = $this->_config;
+		$config = $this->getConfig();
 
 		switch ($type) {
 		case static::FIELD_TITLE:

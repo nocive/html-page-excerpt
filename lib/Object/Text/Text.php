@@ -82,7 +82,7 @@ class Text extends Object
 	 */
 	public function sanitize( $str )
 	{
-		$config = $this->_config;
+		$config = $this->getConfig();
 
 		//Util::hexDump( $str );
 
