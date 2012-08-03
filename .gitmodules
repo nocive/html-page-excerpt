@@ -1,3 +1,6 @@
 [submodule "Mimex"]
 	path = Mimex
 	url = git://github.com/nocive/Mimex.git
+[submodule "lib/Externals/Mimex"]
+	path = lib/Externals/Mimex
+	url = git@github.com:nocive/Mimex.git
