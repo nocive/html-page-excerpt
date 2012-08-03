@@ -31,7 +31,7 @@ class HTMLPageExcerpt extends Base
 	/**
 	 * @constant	string
 	 */
-	const FIELD_THUMBS = 'thumbnails';
+	const FIELD_THUMBS = 'thumbs';
 
 	/**
 	 * @constant	string
@@ -194,10 +194,11 @@ class HTMLPageExcerpt extends Base
 	 * Enter description here ...
 	 * 
 	 * @param	mixed $fields	string, array or null
+	 * @param	bool $flatten
 	 * @throws	FatalException
 	 * @return	mixed
 	 */
-	public function get( $fields = '*' )
+	public function get( $fields = '*', $flatten = false )
 	{
 		if (! $this->_loaded) {
 			throw new FatalException( 'You must call load() or loadHTML() before trying to retrieve any information' );
@@ -217,6 +218,15 @@ class HTMLPageExcerpt extends Base
 		foreach ( $fields as $f ) {
 			if ($getAll || in_array( $f, $this->_fields )) {
 				$data[$f] = $this->_find( $f );
+				if ($flatten) {
+					if (is_array( $data[$f] )) {
+						foreach( $data[$f] as &$v ) {
+							$v = (string) $v;
+						}
+					} else {
+						$data[$f] = (string) $data[$f];
+					}
+				}
 			}
 		}
 
@@ -249,12 +259,14 @@ class HTMLPageExcerpt extends Base
 	 */
 	protected function _loadDocument( $html )
 	{
+		$config = $this->_config;
+
 		$dom = new \DOMDocument();
 		$dom->preserveWhitespace = false;
 		@$dom->loadHTML( $html );
 
 		$dom->encoding = $this->_getEncoding( $dom );
-		$html = $this->_repairHTML( $html, $dom->encoding, $this->_config->get( 'encoding' ) );
+		$html = $this->_repairHTML( $html, $dom->encoding, $config->get( $config::ENCODING ) );
 
 		@$dom->loadHTML( $html );
 
@@ -383,8 +395,8 @@ class HTMLPageExcerpt extends Base
 			case 'meta og:title':
 				$elements = $this->_xpath->query( '/html/head/meta[@property="og:title"]/@content' );
 				foreach( $elements as $elem ) {
-					$candidate = new Text( $elem->nodeValue, true, $this->_config );
-					if (! $candidate->isEmpty() && ($SEO_ignFilters || $candidate->matches( $this->_getFilterOpts( 'title' ) ))) {
+					$candidate = new Text( $elem->nodeValue, true, $config );
+					if (! $candidate->isEmpty() && ($SEO_ignFilters || $candidate->matches( $this->_getFilterOpts( static::FIELD_TITLE ) ))) {
 						// found
 						$title = $candidate;
 						break 3;
@@ -394,8 +406,8 @@ class HTMLPageExcerpt extends Base
 			case 'title':
 				$elements = $this->_xpath->query( '/html/head/title' );
 				foreach( $elements as $elem ) {
-					$candidate = new Text( $elem->nodeValue, true, $this->_config );
-					if (! $candidate->isEmpty() && ($SEO_ignFilters || $candidate->matches( $this->_getFilterOpts( 'title' ) ))) {
+					$candidate = new Text( $elem->nodeValue, true, $config );
+					if (! $candidate->isEmpty() && ($SEO_ignFilters || $candidate->matches( $this->_getFilterOpts( static::FIELD_TITLE ) ))) {
 						// found
 						$title = $candidate;
 						break 3;
@@ -405,8 +417,8 @@ class HTMLPageExcerpt extends Base
 			default:
 				$elements = $this->_dom->getElementsByTagName( $tag );
 				foreach( $elements as $elem ) {
-					$candidate = new Text( $elem->nodeValue, true, $this->_config );
-					if (! $candidate->isEmpty() && $candidate->matches( $this->_getFilterOpts( 'title' ) )) {
+					$candidate = new Text( $elem->nodeValue, true, $config );
+					if (! $candidate->isEmpty() && $candidate->matches( $this->_getFilterOpts( static::FIELD_TITLE ) )) {
 						// found
 						$title = $candidate;
 						break 3;
@@ -443,7 +455,7 @@ class HTMLPageExcerpt extends Base
 				$elements = $this->_xpath->query( '/html/head/meta[@property="og:description"]/@content' );
 				foreach ( $elements as $elem ) {
 					$candidate = new Text( $elem->nodeValue, true, $this->_config );
-					if (! $candidate->isEmpty() && ($SEO_ignFilters || $candidate->matches( $this->_getFilterOpts( 'excerpt' ) ))) {
+					if (! $candidate->isEmpty() && ($SEO_ignFilters || $candidate->matches( $this->_getFilterOpts( static::FIELD_EXCERPT ) ))) {
 						// found
 						$excerpt = $candidate;
 						break 3;
@@ -455,7 +467,7 @@ class HTMLPageExcerpt extends Base
 				$elements = $this->_xpath->query( '/html/head/meta[@name="description"]/@content' );
 				foreach ( $elements as $elem ) {
 					$candidate = new Text( $elem->nodeValue, true, $this->_config );
-					if (! $candidate->isEmpty() && ($SEO_ignFilters || $candidate->matches( $this->_getFilterOpts( 'excerpt' ) ))) {
+					if (! $candidate->isEmpty() && ($SEO_ignFilters || $candidate->matches( $this->_getFilterOpts( static::FIELD_EXCERPT ) ))) {
 						// found
 						$excerpt = $candidate;
 						break 3;
@@ -467,7 +479,7 @@ class HTMLPageExcerpt extends Base
 				$elements = $this->_xpath->query( '/html/body//article/section' );
 				foreach ( $elements as $elem ) {
 					$candidate = new Text( $elem->nodeValue, true, $this->_config );
-					if ($candidate->matches( $this->_getFilterOpts( 'excerpt' ) )) {
+					if ($candidate->matches( $this->_getFilterOpts( static::FIELD_EXCERPT ) )) {
 						// found
 						$excerpt = $candidate;
 						break 3;
@@ -479,7 +491,7 @@ class HTMLPageExcerpt extends Base
 				$elements = $this->_dom->getElementsByTagName( $tag );
 				foreach ( $elements as $elem ) {
 					$candidate = new Text( Util::DOMinnerHTML( $elem ), true, $this->_config );
-					if ($candidate->matches( $this->_getFilterOpts( 'excerpt' ) )) {
+					if ($candidate->matches( $this->_getFilterOpts( static::FIELD_EXCERPT ) )) {
 						// found
 						$excerpt = $candidate;
 						break 3;
@@ -506,7 +518,7 @@ class HTMLPageExcerpt extends Base
 	 * 
 	 * @return	array
 	 */
-	protected function _findThumbnails()
+	protected function _findThumbs()
 	{
 		$config = $this->_config;
 		$SEO_ignFilters = $config->get( $config::THUMBS_SEO_TAGS_IGNORE_FILTERS );
@@ -527,7 +539,7 @@ class HTMLPageExcerpt extends Base
 
 			try {
 				$candidate->identify();
-				if ($SEO_ignFilters || $candidate->matches( $this->_getFilterOpts( 'thumbs' ) )) {
+				if ($SEO_ignFilters || $candidate->matches( $this->_getFilterOpts( static::FIELD_THUMBS ) )) {
 					$thumbnails[] = $candidate;
 					break;
 				}
@@ -550,7 +562,7 @@ class HTMLPageExcerpt extends Base
 				$candidate = new Image( $elem->nodeValue, false, $this->_config );
 				$candidate->url->absolutize( (string) $this->url );
 
-				if (! $candidate->url->isValid() || $this->_isUrlBlacklisted( 'thumbs', $candidate->url )) {
+				if (! $candidate->url->isValid() || $this->_isUrlBlacklisted( static::FIELD_THUMBS, $candidate->url )) {
 					continue;
 				}
 				$thumbs[] = $candidate;
@@ -563,7 +575,7 @@ class HTMLPageExcerpt extends Base
 			foreach ( $thumbs as $t ) {
 				try {
 					$t->identify();
-					if ($t->matches( $this->_getFilterOpts( 'thumbs' ) )) {
+					if ($t->matches( $this->_getFilterOpts( static::FIELD_THUMBS ) )) {
 						$thumbnails[] = $t;
 						if (count( $thumbnails ) >= $config->get( $config::THUMBS_FOUND_STOP_COUNT )) {
 							break;
@@ -606,7 +618,7 @@ class HTMLPageExcerpt extends Base
 
 			try {
 				$candidate->identify();
-				if ($candidate->matches( $this->_getFilterOpts( 'favicon' ) )) {
+				if ($candidate->matches( $this->_getFilterOpts( static::FIELD_FAVICON ) )) {
 					// found
 					$favicon = $candidate;
 					break;
@@ -622,7 +634,7 @@ class HTMLPageExcerpt extends Base
 
 			try {
 				$candidate = new Image( $defaultFavicon, true, $this->_config );
-				if ($candidate->matches( $this->_getFilterOpts( 'favicon' ) )) {
+				if ($candidate->matches( $this->_getFilterOpts( static::FIELD_FAVICON ) )) {
 					// found
 					$favicon = $candidate;
 				}
@@ -670,17 +682,17 @@ class HTMLPageExcerpt extends Base
 		$config = $this->_config;
 
 		switch ($type) {
-		case 'title':
+		case static::FIELD_TITLE:
 			return array( 
 				'min_length' => $config->get( $config::TITLE_MIN_LENGTH ), 
 				'max_length' => $config->get( $config::TITLE_MAX_LENGTH ) 
 			);
-		case 'excerpt':
+		case static::FIELD_EXCERPT:
 			return array( 
 				'min_length' => $config->get( $config::EXCERPT_MIN_LENGTH ), 
 				'max_length' => $config->get( $config::EXCERPT_MAX_LENGTH ) 
 			);
-		case 'thumbs':
+		case static::FIELD_THUMBS:
 			return array( 
 				'mimetypes_include' => $config->get( $config::THUMBS_MIMETYPES_INCLUDE ), 
 				'mimetypes_exclude' => $config->get( $config::THUMBS_MIMETYPES_EXCLUDE ), 
@@ -693,7 +705,7 @@ class HTMLPageExcerpt extends Base
 				'min_size' => $config->get( $config::THUMBS_MIN_SIZE ), 
 				'max_size' => $config->get( $config::THUMBS_MAX_SIZE ) 
 			);
-		case 'favicon':
+		case static::FIELD_FAVICON:
 			return array( 
 				'mimetypes_include' => $config->get( $config::FAVICON_MIMETYPES_INCLUDE ), 
 				'mimetypes_exclude' => $config->get( $config::FAVICON_MIMETYPES_EXCLUDE ), 

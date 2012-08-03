@@ -11,6 +11,11 @@ namespace HTMLPageExcerpt;
 class Text extends Object
 {
 	/**
+	 * @constant	string
+	 */
+	const LINKIFY_TARGET = '_blank';
+
+	/**
 	 * @var		string
 	 * @access	public
 	 */
@@ -52,7 +57,7 @@ class Text extends Object
 	/**
 	 * Enter description here ...
 	 *
-	 * @param	array $criteria					possible criterias: min_length, max_length
+	 * @param	array $criteria			possible criterias: min_length, max_length
 	 * @throws	\InvalidArgumentException
 	 * @return	bool
 	 */
@@ -77,12 +82,14 @@ class Text extends Object
 	 */
 	public function sanitize( $str )
 	{
+		$config = $this->_config;
+
 		//Util::hexDump( $str );
 
 		// add a space if a tag is present right next to a word
 		$str = preg_replace( '@([^\s]+)(<[^>]+>)@', '\\1 \\2', $str );
 
-		//$str = strip_tags( html_entity_decode( $str, ENT_QUOTES, HTML_PageExcerpt_Settings::get( 'encoding' ) ) );
+		$str = strip_tags( html_entity_decode( $str, ENT_QUOTES, $config->get( $config::ENCODING ) ) );
 
 		// turn utf8 nbsp's into normal spaces
 		// @see http://en.wikipedia.org/wiki/Non-breaking_space
@@ -105,7 +112,7 @@ class Text extends Object
 	 * @param	string $target
 	 * @return	string
 	 */
-	public function linkify( $target = '_blank' )
+	public function linkify( $target = self::LINKIFY_TARGET )
 	{
 		$target = ! empty( $target ) ? " target=\"$target\"" : '';
 		$this->content = preg_replace( '@(https?://[^\s]+)@', "<a href=\"\\1\"$target>\\1</a>", $this->content );

@@ -76,7 +76,7 @@ class Bootstrap
 			}
 
 			foreach ( self::$_dependencies as $dep ) {
-                                if (false === @include_once ($dep)) {
+                                if (false === @include_once( __DIR__ . DIRECTORY_SEPARATOR . '..' . DIRECTORY_SEPARATOR . $dep )) {
                                         throw new FatalException( "Required dependency '$dep' was not found!" );
                                 }
                         }
@@ -95,7 +95,7 @@ class Bootstrap
 	{
 		$class = str_replace( __NAMESPACE__ . '\\', '', $class );
 		if (isset( self::$classmap[$class] )) {
-			include_once( __DIR__ . '/../' . self::$classmap[$class] . self::CLASS_EXTENSION );
+			include_once( __DIR__ . DIRECTORY_SEPARATOR . '..' . DIRECTORY_SEPARATOR . self::$classmap[$class] . self::CLASS_EXTENSION );
 		}
 	} // autoload }}}
 
@@ -110,4 +110,4 @@ class Bootstrap
 }
 
 Bootstrap::autoloadRegister();
-
+ 
