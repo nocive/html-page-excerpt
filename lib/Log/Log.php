@@ -60,7 +60,7 @@ class Log
 	 */
 	public static function write( $logfile, $str, $level, $appendNewline = true )
 	{
-		if (! in_array( $level, self::$_levels)) {
+		if (! in_array( $level, static::$_levels)) {
 			throw new FatalException( "Invalid log level specified '$level'" );
 		}
 		$str = date( 'M  d H:i:s' ) . ' ' . __CLASS__ . ": $level >> $str" . ($appendNewline ? "\n" : '');

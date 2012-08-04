@@ -148,14 +148,14 @@ class Image extends Object
 		}
 
 		$this->url->fetch();
-		$this->_tmpfilename = Util::tempFilename( self::TEMPFILE_PREFIX );
+		$this->_tmpfilename = Util::tempFilename( static::TEMPFILE_PREFIX );
 		$this->url->save( $this->_tmpfilename );
 		// free some memory
 		unset( $this->url->content );
 
 		$this->mimetype = Util::fileDetectMimetype( $this->_tmpfilename );
 		if (strpos( $this->mimetype, 'image/' ) !== 0) {
-			throw new InvalidImageFileException( 'File is not a valid image' );
+			throw new InvalidImageFileException( "File '{$this->_tmpfilename}' is not a valid image" );
 		}
 
 		$this->size = filesize( $this->_tmpfilename );
@@ -193,7 +193,7 @@ class Image extends Object
 		extract( $criteria );
 
 		if ((! empty( $mimetypes_exclude ) || ! empty( $mimetypes_include )) && (! empty( $extensions_exclude ) || ! empty( $extensions_include ))) {
-			throw new FatalException( 'Can\'t do mimetypes include/exclude together with extensions include/exclude, please use only one of both' );
+			throw new FatalException( 'Can\'t do mimetypes include/exclude together with extensions include/exclude, use only one of both' );
 		}
 
 		if (! empty( $extensions_include )) {
@@ -291,7 +291,7 @@ class Image extends Object
 		foreach ( $this->_fields as $f ) {
 			if ($getAll || in_array( $f, $fields )) {
 				// typecast to string url class
-				$data[$f] = ($f === self::FIELD_URL) ? (string) $this->{$f} : $this->{$f};
+				$data[$f] = ($f === static::FIELD_URL) ? (string) $this->{$f} : $this->{$f};
 			}
 		}
 

@@ -166,7 +166,7 @@ class Config
 	 */
 	public function __construct( $cfg = null )
 	{
-		$cfg = $cfg !== null ? array_merge( self::$_defaults, $cfg ) : self::$_defaults;
+		$cfg = $cfg !== null ? array_merge( static::$_defaults, $cfg ) : static::$_defaults;
 		$this->set( $cfg );
 	} // __construct }}}
 
@@ -220,7 +220,7 @@ class Config
 		}
 
 		foreach ( $vars as $var => $value ) {
-			if (array_key_exists( $var, self::$_defaults )) {
+			if (array_key_exists( $var, static::$_defaults )) {
 				$this->_config[$var] = $value;
 			}
 		}
@@ -231,7 +231,7 @@ class Config
 	 */
 	public function reset()
 	{
-		$this->set( self::$_defaults );
+		$this->set( static::$_defaults );
 	} // reset }}}
 }
 

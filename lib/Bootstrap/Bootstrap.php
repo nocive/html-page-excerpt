@@ -91,17 +91,17 @@ class Bootstrap
 		static $checked = false;
 
 		if (! $checked) {
-			if (version_compare( PHP_VERSION, self::PHP_MIN_VERSION ) < 0) {
-				throw new FatalException( 'This library requires PHP version >= ' . self::PHP_MIN_VERSION );
+			if (version_compare( PHP_VERSION, static::PHP_MIN_VERSION ) < 0) {
+				throw new FatalException( 'This library requires PHP version >= ' . static::PHP_MIN_VERSION );
 			}
 
-			foreach ( self::$_extensions as $ext ) {
+			foreach ( static::$_extensions as $ext ) {
 				if (! extension_loaded( $ext )) {
 					throw new FatalException( "Required extension '$ext' is not loaded!" );
 				}
 			}
 
-			foreach ( self::$_dependencies as $dep ) {
+			foreach ( static::$_dependencies as $dep ) {
                                 if (false === @include_once( __DIR__ . DIRECTORY_SEPARATOR . '..' . DIRECTORY_SEPARATOR . $dep )) {
                                         throw new FatalException( "Required dependency '$dep' was not found!" );
                                 }
@@ -120,8 +120,8 @@ class Bootstrap
 	public static function autoload( $class )
 	{
 		$class = str_replace( __NAMESPACE__ . '\\', '', $class );
-		if (isset( self::$classmap[$class] )) {
-			include_once( __DIR__ . DIRECTORY_SEPARATOR . '..' . DIRECTORY_SEPARATOR . self::$classmap[$class] . self::CLASS_EXTENSION );
+		if (isset( static::$classmap[$class] )) {
+			include_once( __DIR__ . DIRECTORY_SEPARATOR . '..' . DIRECTORY_SEPARATOR . static::$classmap[$class] . static::CLASS_EXTENSION );
 		}
 	} // autoload }}}
 
