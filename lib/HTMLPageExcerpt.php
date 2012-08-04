@@ -585,8 +585,7 @@ class HTMLPageExcerpt extends Base
 			} catch ( CommunicationException $e ) {
 			}
 
-			$tries ++;
-			if ($tries > $maxTries) {
+			if (++$tries > $maxTries) {
 				break;
 			}
 		}
@@ -624,8 +623,7 @@ class HTMLPageExcerpt extends Base
 				} catch ( CommunicationException $e ) {
 				}
 
-				$tries ++;
-				if ($tries > $maxTries) {
+				if (++$tries > $maxTries) {
 					break;
 				}
 			}
