@@ -54,6 +54,11 @@ class HTMLPageExcerpt extends Base
 	const OPEN_GRAPH_NS_URL = 'http://ogp.me/ns#';
 
 	/**
+	 * @constant	string
+	 */
+	const DEFAULT_FAVICON = '/favicon.ico';
+
+	/**
 	 * @var		Url
 	 * @access	public
 	 */
@@ -556,6 +561,7 @@ class HTMLPageExcerpt extends Base
 		$SEO_ignFilters = $config->get( $config::THUMBS_SEO_TAGS_IGNORE_FILTERS );
 		$thumbnails = array();
 		$tries = 0;
+		$maxTries = $config->get( $config::THUMBS_MAX_TRIES );
 
 		// first method: search <meta propert="og:image" content="">
 		$elements = $this->_xpath->query( '/html/head/meta[@property="og:image"]/@content' );
@@ -580,7 +586,7 @@ class HTMLPageExcerpt extends Base
 			}
 
 			$tries ++;
-			if ($tries > $config->get( $config::THUMBS_MAX_TRIES )) {
+			if ($tries > $maxTries) {
 				break;
 			}
 		}
@@ -604,12 +610,13 @@ class HTMLPageExcerpt extends Base
 			$thumbs = array_unique( $thumbs );
 
 			// we should validate after array_unique, otherwise we could be wasting a lot of resources on repeated url's
+			$foundStopCount = $config->get( $config::THUMBS_FOUND_STOP_COUNT );
 			foreach ( $thumbs as $t ) {
 				try {
 					$t->identify();
 					if ($t->matches( $this->_getFilterOpts( static::FIELD_THUMBS ) )) {
 						$thumbnails[] = $t;
-						if (count( $thumbnails ) >= $config->get( $config::THUMBS_FOUND_STOP_COUNT )) {
+						if (! empty( $foundStopCount ) && count( $thumbnails ) >= $foundStopCount) {
 							break;
 						}
 					}
@@ -618,7 +625,7 @@ class HTMLPageExcerpt extends Base
 				}
 
 				$tries ++;
-				if ($tries > $config->get( $config::THUMBS_MAX_TRIES )) {
+				if ($tries > $maxTries) {
 					break;
 				}
 			}
@@ -662,7 +669,7 @@ class HTMLPageExcerpt extends Base
 
 		// if nothing was found, look for it in the default location http://domain/favicon.ico
 		if (empty( $favicon )) {
-			$defaultFavicon = parse_url( $this->url, PHP_URL_SCHEME ) . '://' . parse_url( $this->url, PHP_URL_HOST ) . '/favicon.ico';
+			$defaultFavicon = parse_url( $this->url, PHP_URL_SCHEME ) . '://' . parse_url( $this->url, PHP_URL_HOST ) . static::DEFAULT_FAVICON;
 
 			try {
 				$candidate = new Image( $defaultFavicon, true, $this->_config );
