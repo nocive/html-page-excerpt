@@ -1,6 +1,7 @@
 <?php
 
 namespace HTMLPageExcerpt;
+require_once( __DIR__ . '/../HTMLPageExcerpt.php' );
 
 /**
  * Test class
@@ -10,5 +11,16 @@ namespace HTMLPageExcerpt;
  */
 class Test
 {
-	// TODO
+	/**
+	 * @var		HTMLPageExcerpt
+	 * @access	public
+	 */
+	public $instance;
+
+
+	public function __construct( $config = null )
+	{
+		$this->instance = new HTMLPageExcerpt( null, $config );
+	} // __construct }}}
 }
+
