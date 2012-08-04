@@ -118,6 +118,12 @@ class HTMLPageExcerpt extends Base
 		self::FIELD_FAVICON
 	);
 
+	/**
+	 * @var		HTMLPageExcerpt
+	 * @access	protected
+	 */
+	protected static $_instance;
+
 
 	/**
 	 * Enter description here ...
@@ -138,10 +144,35 @@ class HTMLPageExcerpt extends Base
 
 	/**
 	 * Enter description here ...
+	 *
+	 * @return HTMLPageExcerpt
+	 */
+	public static function getInstance()
+	{
+		if (! static::$_instance) {
+			static::$_instance = new static();
+		}
+		return static::$_instance;
+	} // getInstance }}}
+
+	/**
+	 * Enter description here ...
+	 *
+	 * @param	HTMLPageExcerpt $instance
+	 */
+	public static function setInstance( $instance )
+	{
+		if (! $instance instanceof HTMLPageExcerpt) {
+			throw new \InvalidArgumentException( '$instance is not an instance of HTMLPageExcerpt' );
+		}
+		static::$_instance = $instance;
+	} // setInstance }}}
+
+	/**
+	 * Enter description here ...
 	 * 
 	 * @param	string $source		optional
 	 * @throws	FileReadWriteException
-	 * @return	void
 	 */
 	public function load( $source = null )
 	{
@@ -170,7 +201,6 @@ class HTMLPageExcerpt extends Base
 	 * @param	string $html
 	 * @param	string $url	optional
 	 * @throws	FatalException
-	 * @return	void
 	 */
 	public function loadHTML( $html, $url = null )
 	{
@@ -234,7 +264,7 @@ class HTMLPageExcerpt extends Base
 	} // get }}}
 
 	/**
-	 * Enter description here ...
+	 * Resets the class to it's initial state
 	 */
 	public function reset()
 	{
