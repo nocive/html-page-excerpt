@@ -162,8 +162,9 @@ class HTMLPageExcerpt extends Base
 	 */
 	public static function setInstance( $instance )
 	{
-		if (! $instance instanceof HTMLPageExcerpt) {
-			throw new \InvalidArgumentException( '$instance is not an instance of HTMLPageExcerpt' );
+		$class = __CLASS__;
+		if (! $instance instanceof $class) {
+			throw new \InvalidArgumentException( '$instance is not an instance of ' . __CLASS__ );
 		}
 		static::$_instance = $instance;
 	} // setInstance }}}
