@@ -20,15 +20,11 @@ abstract class Base
 	/**
 	 * Class constructor
 	 *
-	 * @param	Config|array
+	 * @param	Config|array|null
 	 */
-	public function __construct( $config )
+	public function __construct( $config = null )
 	{
-		if ($config instanceof Config) {
-			$this->_config = $config;
-		} else {
-			$this->_config = new Config( $config );
-		}
+		$this->setConfig( $config );
 	} // __construct }}}
 
 	/**
@@ -50,10 +46,11 @@ abstract class Base
 	 */
 	public function setConfig( $config )
 	{
-		if (! $config instanceof Config) {
-			throw new \InvalidArgumentException( '$config must be an instance of Config' );
+		if ($config instanceof Config) {
+			$this->_config = $config;
+		} else {
+			$this->_config = new Config( $config );
 		}
-		$this->_config = $config;
 		return $this;
 	} // setConfig }}}
 

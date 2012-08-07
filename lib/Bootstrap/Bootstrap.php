@@ -55,6 +55,7 @@ class Bootstrap
 		'Image' => 'Object/Image/Image',
 		'Util' => 'Util/Util',
 		'Log' => 'Log/Log',
+		'Test' => 'Test/Test',
 		'Exception' => 'Exception/Exception',
 		'CommunicationException' => 'Exception/Exception',
 		'FileReadWriteException' => 'Exception/Exception',

@@ -163,9 +163,13 @@ class Config
 	 * Class constructor
 	 *
 	 * @param	$cfg null|array
+	 * @throws	\InvalidArgumentException
 	 */
 	public function __construct( $cfg = null )
 	{
+		if (null !== $cfg && ! is_array( $cfg )) {
+			throw new \InvalidArgumentException( '$cfg must be either null or an array' );
+		}
 		$cfg = $cfg !== null ? array_merge( static::$_defaults, $cfg ) : static::$_defaults;
 		$this->set( $cfg );
 	} // __construct }}}
