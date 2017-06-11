@@ -32,7 +32,7 @@ abstract class AbstractAssetFinder
      *
      * @throws \InvalidArgumentException
      */
-    protected static function DOMinnerHTML(\DOMNode $element)
+    protected static function DOMInnerHTML(\DOMNode $element)
     {
         $innerHTML = '';
         $children = $element->childNodes;

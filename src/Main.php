@@ -6,16 +6,16 @@ use HTMLPageExcerpt\Asset\Url;
 use HTMLPageExcerpt\Exception\FatalException;
 use HTMLPageExcerpt\Http\HttpFetcher;
 
-class Main
+final class Main
 {
     /** @var Url */
     protected $url;
 
     /** @var Document */
-    protected $document;
+    private $document;
 
     /** @var Config */
-    protected $config;
+    private $config;
 
     /**
      * @param Config $config

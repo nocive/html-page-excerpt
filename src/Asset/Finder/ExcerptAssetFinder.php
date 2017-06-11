@@ -58,7 +58,7 @@ class ExcerptAssetFinder extends AbstractAssetFinder implements AssetFinderInter
                     // default behaviour: search "normal" tags for text
                     $elements = $this->dom->getElementsByTagName($method);
                     foreach ($elements as $elem) {
-                        $candidate = new Text(static::DOMinnerHTML($elem), true);
+                        $candidate = new Text(static::DOMInnerHTML($elem), true);
                         if ($candidate->matches($this->config)) {
                             // found
                             $excerpt = $candidate;

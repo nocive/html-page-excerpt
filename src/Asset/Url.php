@@ -88,10 +88,11 @@ class Url implements AssetInterface
             'scheme'   => '',
             'host'     => '',
             'port'     => '',
+            'path'     => '',
             'user'     => '',
             'pass'     => '',
             'query'    => '',
-            'fragment' => ''
+            'fragment' => '',
         );
         $parts = array_merge($defaultParts, parse_url($base));
 
