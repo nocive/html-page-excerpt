@@ -6,7 +6,6 @@ use HTMLPageExcerpt\Exception\FatalException;
 use HTMLPageExcerpt\Exception\FileIOException;
 use HTMLPageExcerpt\Exception\InvalidImageFileException;
 use HTMLPageExcerpt\FileInfo;
-use HTMLPageExcerpt\Util;
 
 class Image implements AssetInterface
 {
@@ -82,7 +81,7 @@ class Image implements AssetInterface
         }
 
         $this->url->fetch();
-        $this->tmpFilename = Util::tempFilename(static::TEMPFILE_PREFIX);
+        $this->tmpFilename = static::tempFilename(static::TEMPFILE_PREFIX);
         $this->url->save($this->tmpFilename);
         // free some memory
         unset($this->url->content);
@@ -263,5 +262,13 @@ class Image implements AssetInterface
     public function __toString()
     {
         return (string) $this->url;
+    }
+
+    /**
+     * @return string
+     */
+    protected static function tempFilename()
+    {
+        return sys_get_temp_dir() . DIRECTORY_SEPARATOR . str_replace('.', '_', uniqid(static::TEMPFILE_PREFIX, true)) . '.tmp';
     }
 }

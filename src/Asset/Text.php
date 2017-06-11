@@ -2,8 +2,6 @@
 
 namespace HTMLPageExcerpt\Asset;
 
-use HTMLPageExcerpt\Util;
-
 class Text implements AssetInterface
 {
     const LINKIFY_TARGET = '_blank';
@@ -37,7 +35,7 @@ class Text implements AssetInterface
             return $this->content;
         }
 
-        $this->content = Util::substrw($this->content, $length, $terminator);
+        $this->content = static::substrWords($this->content, $length, $terminator);
 
         return $this->content;
     }
@@ -108,5 +106,23 @@ class Text implements AssetInterface
     public function isEmpty()
     {
         return empty($this->content);
+    }
+
+    protected static function substrWords($str, $length, $terminator = '...', $minWord = 3)
+    {
+        $sub = '';
+        $len = 0;
+
+        foreach (explode(' ', $str) as $word) {
+            $part = (($sub != '') ? ' ' : '') . $word;
+            $sub .= $part;
+            $len += strlen($part);
+
+            if (strlen($word) > $minWord && strlen($sub) >= $length) {
+                break;
+            }
+        }
+
+        return $sub . (($len < strlen($str)) ? $terminator : '');
     }
 }

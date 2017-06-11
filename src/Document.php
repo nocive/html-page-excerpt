@@ -230,7 +230,7 @@ class Document
 
         if (!empty($fromEncoding)) {
             if (strtoupper($fromEncoding) !== strtoupper($toEncoding)) {
-                $html = Util::convertEncoding($html, $fromEncoding, $toEncoding);
+                $html = static::convertEncoding($html, $fromEncoding, $toEncoding);
             }
             $html = mb_convert_encoding($html, 'HTML-ENTITIES', $toEncoding);
         }
@@ -245,5 +245,10 @@ class Document
         $html = str_replace(array('&#146;', '&#147;', '&#148;', '&#150;'), array('&#8217;', '&#8220;', '&#8221;', '&#8722;'), $html);
 
         return $html;
+    }
+
+    protected static function convertEncoding($str, $from, $to)
+    {
+        return @iconv($from, $to, $str);
     }
 }

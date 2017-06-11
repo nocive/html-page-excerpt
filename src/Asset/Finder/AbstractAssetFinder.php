@@ -24,4 +24,24 @@ abstract class AbstractAssetFinder
         $this->dom    = $dom;
         $this->xpath  = $xpath;
     }
+
+    /**
+     * @param  \DOMNode $element
+     *
+     * @return string
+     *
+     * @throws \InvalidArgumentException
+     */
+    protected static function DOMinnerHTML(\DOMNode $element)
+    {
+        $innerHTML = '';
+        $children = $element->childNodes;
+        foreach ($children as $child) {
+            $tmpDom = new \DOMDocument();
+            $tmpDom->appendChild($tmpDom->importNode($child, true));
+            $innerHTML .= trim($tmpDom->saveHTML());
+        }
+
+        return $innerHTML;
+    }
 }

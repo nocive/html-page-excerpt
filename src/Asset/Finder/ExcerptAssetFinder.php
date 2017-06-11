@@ -3,7 +3,6 @@
 namespace HTMLPageExcerpt\Asset\Finder;
 
 use HTMLPageExcerpt\Asset\Text;
-use HTMLPageExcerpt\Util;
 
 class ExcerptAssetFinder extends AbstractAssetFinder implements AssetFinderInterface
 {
@@ -59,7 +58,7 @@ class ExcerptAssetFinder extends AbstractAssetFinder implements AssetFinderInter
                     // default behaviour: search "normal" tags for text
                     $elements = $this->dom->getElementsByTagName($method);
                     foreach ($elements as $elem) {
-                        $candidate = new Text(Util::DOMinnerHTML($elem), true);
+                        $candidate = new Text(static::DOMinnerHTML($elem), true);
                         if ($candidate->matches($this->config)) {
                             // found
                             $excerpt = $candidate;
