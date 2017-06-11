@@ -8,9 +8,6 @@ use HTMLPageExcerpt\Http\HttpFetcher;
 
 final class Main
 {
-    /** @var Url */
-    protected $url;
-
     /** @var Document */
     private $document;
 
@@ -57,7 +54,7 @@ final class Main
     {
         $url = new Url($url);
         if (!$url->isValid()) {
-            throw new FatalException(sprintf('Url "%s" is not a valid absolute url', $url));
+            throw new FatalException(sprintf('Url "%s" is not a valid absolute url', (string) $url));
         }
         $url->fetch();
         $html = $url->content();
@@ -74,7 +71,7 @@ final class Main
     {
         $url = new Url($url);
         if (!$url->isValid()) {
-            throw new FatalException(sprintf('Url "%s" is not a valid absolute url', $url));
+            throw new FatalException(sprintf('Url "%s" is not a valid absolute url', (string) $url));
         }
 
         $this->loadDocument($url, $html);
@@ -86,16 +83,40 @@ final class Main
      *
      * @return mixed
      */
-    public function get($fields, $flatten = true)
+    public function get($fields, $flatten = false)
     {
         return $this->document->get($fields, $flatten);
     }
 
     /**
-     * @param string $url
+     * @return array
+     */
+    public function getAsArray()
+    {
+        return $this->document->get('*', $flatten = true);
+    }
+
+    /**
+     * @return string
+     */
+    public function getAsJson()
+    {
+        return json_encode($this->getAsArray());
+    }
+
+    /**
+     * @return Document
+     */
+    public function getDocument()
+    {
+        return $this->document;
+    }
+
+    /**
+     * @param Url    $url
      * @param string $html
      */
-    protected function loadDocument($url, $html)
+    protected function loadDocument(Url $url, $html)
     {
         $this->document = new Document($this->config, $url, $html);
     }

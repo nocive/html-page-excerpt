@@ -58,10 +58,10 @@ class Document
 
     /**
      * @param Config $config
-     * @param string $url
+     * @param Url    $url
      * @param string $html
      */
-    public function __construct(Config $config, $url, $html)
+    public function __construct(Config $config, Url $url, $html)
     {
         $this->config = $config;
         $this->url = $url;
@@ -130,6 +130,19 @@ class Document
         return $data;
     }
 
+    /**
+     * @return string
+     */
+    public function getUrl()
+    {
+        return (string) $this->url;
+    }
+
+    /**
+     * @param  string $what
+     *
+     * @return mixed
+     */
     protected function find($what)
     {
         $what = strtolower($what);

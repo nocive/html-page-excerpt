@@ -43,7 +43,7 @@ foreach ($urls as $url) {
     echo "** $url\n";
     try {
         $pe->loadURL($url);
-        $data = $pe->get('*', true);
+        $data = $pe->getAsArray();
         var_dump($data);
     } catch (\HTMLPageExcerpt\Exception\CommunicationException $e) {
         echo ">> Fetching error, skipping\n";

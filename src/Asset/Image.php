@@ -81,14 +81,16 @@ class Image implements AssetInterface
         }
 
         $this->url->fetch();
-        $this->tmpFilename = static::tempFilename(static::TEMPFILE_PREFIX);
+        $this->tmpFilename = static::tempFilename();
         $this->url->save($this->tmpFilename);
         // free some memory
         unset($this->url->content);
 
         $this->mimeType = FileInfo::detectMimeType($this->tmpFilename);
         if (strpos($this->mimeType, 'image/') !== 0) {
-            throw new InvalidImageFileException("File '{$this->tmpFilename}' is not a valid image");
+            throw new InvalidImageFileException(
+                sprintf('Image %s (%s) is not a valid image', (string) $this->url, $this->tmpFilename)
+            );
         }
 
         $this->size = filesize($this->tmpFilename);
@@ -96,13 +98,14 @@ class Image implements AssetInterface
         // skip svgs as they have no real size
         if (strpos($this->mimeType, 'image/svg') !== 0) {
             if (false === ($imgInfo = @getimagesize($this->tmpFilename))) {
-                throw new FatalException("Error calling getimagesize() on image '{$this->tmpFilename}'");
+                throw new FatalException(
+                    sprintf('Error calling getimagesize() on image %s (%s)', (string) $this->url, $this->tmpFilename)
+                );
             }
             $this->width = $imgInfo[0];
             $this->height = $imgInfo[1];
         }
         $this->extension = FileInfo::mimeTypeToExtension($this->mimeType);
-
         $this->identified = true;
     }
 
@@ -123,13 +126,16 @@ class Image implements AssetInterface
         // TODO drop usage of extract
         extract($criteria);
 
-        if ((!empty($mimetypes_exclude) || !empty($mimetypes_include)) && (!empty($extensions_exclude) || !empty($extensions_include))) {
-            throw new FatalException('Can\'t do mimetypes include/exclude together with extensions include/exclude, use only one of both');
+        if (
+            (!empty($mimetypes_exclude) || !empty($mimetypes_include)) &&
+            (!empty($extensions_exclude) || !empty($extensions_include))
+        ) {
+            throw new FatalException('Cannot do mimetypes include/exclude together with extensions include/exclude, use only one of both');
         }
 
         if (!empty($extensions_include)) {
             if (empty($this->extension)) {
-                throw new FatalException('Extension is empty can\'t do matching');
+                throw new FatalException('Extension is empty, cannot do matching');
             }
 
             $mimetypes_include = array();
@@ -143,7 +149,7 @@ class Image implements AssetInterface
 
         if (!empty($extensions_exclude)) {
             if (empty($this->extension)) {
-                throw new FatalException('Extension is empty can\'t do matching');
+                throw new FatalException('Extension is empty, cannot do matching');
             }
 
             $mimetypes_exclude = array();
@@ -157,7 +163,7 @@ class Image implements AssetInterface
 
         if (!empty($mimetypes_include)) {
             if (empty($this->mimeType)) {
-                throw new FatalException('Mimetype is empty can\'t do matching');
+                throw new FatalException('Mimetype is empty, cannot do matching');
             }
             if (!is_array($mimetypes_include)) {
                 $mimetypes_include = (array)$mimetypes_include;
@@ -170,7 +176,7 @@ class Image implements AssetInterface
 
         if (!empty($mimetypes_exclude)) {
             if (empty($this->mimeType)) {
-                throw new FatalException('Mimetype is empty can\'t do matching');
+                throw new FatalException('Mimetype is empty, cannot do matching');
             }
             if (!is_array($mimetypes_exclude)) {
                 $mimetypes_exclude = (array)$mimetypes_exclude;
@@ -182,11 +188,11 @@ class Image implements AssetInterface
         }
 
         if (empty($this->width) && (!empty($min_width) || !empty($max_width))) {
-            throw new FatalException('Width is empty can\'t do matching');
+            throw new FatalException('Width is empty, cannot do matching');
         }
 
         if (empty($this->height) && (!empty($min_height) || !empty($max_height))) {
-            throw new FatalException('Height is empty can\'t do matching');
+            throw new FatalException('Height is empty, cannot do matching');
         }
 
         return (
@@ -248,7 +254,7 @@ class Image implements AssetInterface
         }
 
         if (false === ($content = @file_get_contents($this->tmpFilename))) {
-            throw new FileIOException("Could not read contents of file '{$this->tmpFilename}'");
+            throw new FileIOException(sprintf('Could not read contents of file "%s"', $this->tmpFilename));
         }
 
         return $content;
