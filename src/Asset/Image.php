@@ -110,8 +110,7 @@ class Image implements AssetInterface
     }
 
     /**
-     * @param  array $criteria   Possible criterias: mimetypes_include, mimetypes_exclude, extensions_include,
-     *                           extensions_exclude, min_width, max_width, min_height, max_height, min_size, max_size
+     * @param  array $criteria
      *
      * @return bool
      *
@@ -123,85 +122,91 @@ class Image implements AssetInterface
             $this->identify();
         }
 
-        // TODO drop usage of extract
-        extract($criteria);
+        $c = array_merge(array(
+            'mimetypes_include'  => array(),
+            'mimetypes_exclude'  => array(),
+            'extensions_include' => array(),
+            'extensions_exclude' => array(),
+            'min_width'          => null,
+            'max_width'          => null,
+            'min_height'         => null,
+            'max_height'         => null,
+            'min_size'           => null,
+            'max_size'           => null,
+        ), $criteria);
 
         if (
-            (!empty($mimetypes_exclude) || !empty($mimetypes_include)) &&
-            (!empty($extensions_exclude) || !empty($extensions_include))
+            (!empty($c['mimetypes_exclude']) || !empty($c['mimetypes_include'])) &&
+            (!empty($c['extensions_exclude']) || !empty($c['extensions_include']))
         ) {
-            throw new FatalException('Cannot do mimetypes include/exclude together with extensions include/exclude, use only one of both');
+            throw new FatalException(
+                'Cannot do mimetypes include/exclude together with extensions include/exclude, use only one of both'
+            );
         }
 
-        if (!empty($extensions_include)) {
+        if (!empty($c['extensions_include'])) {
             if (empty($this->extension)) {
                 throw new FatalException('Extension is empty, cannot do matching');
             }
 
-            $mimetypes_include = array();
-            foreach ($extensions_include as $ext) {
+            $c['mimetypes_include'] = array();
+            foreach ($c['extensions_include'] as $ext) {
                 $mime = FileInfo::extensionToMimeType($ext);
                 if (!empty($mime)) {
-                    $mimetypes_include[] = $mime;
+                    $c['mimetypes_include'][] = $mime;
                 }
             }
         }
 
-        if (!empty($extensions_exclude)) {
+        if (!empty($c['extensions_exclude'])) {
             if (empty($this->extension)) {
                 throw new FatalException('Extension is empty, cannot do matching');
             }
 
-            $mimetypes_exclude = array();
-            foreach ($extensions_exclude as $ext) {
+            $c['mimetypes_exclude'] = array();
+            foreach ($c['extensions_exclude'] as $ext) {
                 $mime = FileInfo::extensionToMimeType($ext);
                 if (!empty($mime)) {
-                    $mimetypes_exclude[] = $mime;
+                    $c['mimetypes_exclude'][] = $mime;
                 }
             }
         }
 
-        if (!empty($mimetypes_include)) {
+        if (!empty($c['mimetypes_include'])) {
             if (empty($this->mimeType)) {
                 throw new FatalException('Mimetype is empty, cannot do matching');
             }
-            if (!is_array($mimetypes_include)) {
-                $mimetypes_include = (array)$mimetypes_include;
-            }
 
-            if (!in_array($this->mimeType, $mimetypes_include)) {
+            if (!in_array($this->mimeType, $c['mimetypes_include'], true)) {
                 return false;
             }
         }
 
-        if (!empty($mimetypes_exclude)) {
+        if (!empty($c['mimetypes_exclude'])) {
             if (empty($this->mimeType)) {
                 throw new FatalException('Mimetype is empty, cannot do matching');
             }
-            if (!is_array($mimetypes_exclude)) {
-                $mimetypes_exclude = (array)$mimetypes_exclude;
-            }
 
-            if (in_array($this->mimeType, $mimetypes_exclude)) {
+            if (in_array($this->mimeType, $c['mimetypes_exclude'], true)) {
                 return false;
             }
         }
 
-        if (empty($this->width) && (!empty($min_width) || !empty($max_width))) {
+        if (empty($this->width) && (!empty($c['min_width']) || !empty($c['max_width']))) {
             throw new FatalException('Width is empty, cannot do matching');
         }
 
-        if (empty($this->height) && (!empty($min_height) || !empty($max_height))) {
+        if (empty($this->height) && (!empty($c['min_height']) || !empty($c['max_height']))) {
             throw new FatalException('Height is empty, cannot do matching');
         }
 
         return (
-            (empty($min_width) || $this->width >= $min_width) &&
-            (empty($max_width) || $this->width <= $max_width) &&
-            (empty($min_height) || $this->height >= $min_height) &&
-            (empty($max_height) || $this->height <= $max_height) &&
-            (empty($min_size) || $this->size >= $min_size) &&
-            (empty($max_size) || $this->size <= $max_size)
+            (empty($c['min_width']) || $this->width >= $c['min_width']) &&
+            (empty($c['max_width']) || $this->width <= $c['max_width']) &&
+            (empty($c['min_height']) || $this->height >= $c['min_height']) &&
+            (empty($c['max_height']) || $this->height <= $c['max_height']) &&
+            (empty($c['min_size']) || $this->size >= $c['min_size']) &&
+            (empty($c['max_size']) || $this->size <= $c['max_size'])
         );
     }
 
