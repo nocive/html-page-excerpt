@@ -1,0 +1,14 @@
+{
+    "autoload": {
+        "psr-4": {"HTMLPageExcerpt\\": "src/"}
+    },
+    "require": {
+        "php": ">=5.3",
+        "ext-curl": "*",
+        "ext-dom": "*",
+        "ext-iconv": "*",
+        "ext-fileinfo": "*",
+        "monolog/monolog": "1.*",
+        "ralouphie/mimey": "^1.0"
+    }
+}
