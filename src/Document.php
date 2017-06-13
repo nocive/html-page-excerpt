@@ -92,8 +92,8 @@ class Document
     }
 
     /**
-     * @param  mixed $fields
-     * @param  bool  $flatten
+     * @param  string|array $fields
+     * @param  bool         $flatten
      *
      * @return mixed
      *
@@ -202,6 +202,9 @@ class Document
         return $this->favicon;
     }
 
+    /**
+     * @return string
+     */
     protected function detectEncoding()
     {
         // get encoding from announced http content type header, if any
@@ -260,6 +263,13 @@ class Document
         return $html;
     }
 
+    /**
+     * @param  string $str
+     * @param  string $from
+     * @param  string $to
+     *
+     * @return string
+     */
     protected static function convertEncoding($str, $from, $to)
     {
         return @iconv($from, $to, $str);

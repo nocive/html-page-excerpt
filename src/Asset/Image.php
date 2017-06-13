@@ -6,6 +6,7 @@ use HTMLPageExcerpt\Exception\FatalException;
 use HTMLPageExcerpt\Exception\FileIOException;
 use HTMLPageExcerpt\Exception\InvalidImageFileException;
 use HTMLPageExcerpt\FileInfo;
+use HTMLPageExcerpt\FileInfoInterface;
 
 class Image implements AssetInterface
 {
@@ -51,6 +52,9 @@ class Image implements AssetInterface
     /** @var string */
     protected $tmpFilename;
 
+    /** @var FileInfoInterface */
+    protected $fileInfo;
+
     /**
      * @param string $url
      * @param bool   $identify
@@ -58,6 +62,8 @@ class Image implements AssetInterface
     public function __construct($url, $identify = false)
     {
         $this->url = new Url($url, $sanitize = true, $fetch = false);
+        $this->fileInfo = new FileInfo();
+
         if ($identify) {
             $this->identify();
         }
@@ -80,13 +86,13 @@ class Image implements AssetInterface
             return;
         }
 
-        $this->url->fetch();
         $this->tmpFilename = static::tempFilename();
+        $this->url->fetch();
         $this->url->save($this->tmpFilename);
-        // free some memory
+        // free some memory by discarding the content
         unset($this->url->content);
 
-        $this->mimeType = FileInfo::detectMimeType($this->tmpFilename);
+        $this->mimeType = $this->fileInfo->detectMimeType($this->tmpFilename);
         if (strpos($this->mimeType, 'image/') !== 0) {
             throw new InvalidImageFileException(
                 sprintf('Image %s (%s) is not a valid image', (string) $this->url, $this->tmpFilename)
@@ -105,7 +111,7 @@ class Image implements AssetInterface
             $this->width = $imgInfo[0];
             $this->height = $imgInfo[1];
         }
-        $this->extension = FileInfo::mimeTypeToExtension($this->mimeType);
+        $this->extension = $this->fileInfo->mimeTypeToExtension($this->mimeType);
         $this->identified = true;
     }
 
@@ -151,7 +157,7 @@ class Image implements AssetInterface
 
             $c['mimetypes_include'] = array();
             foreach ($c['extensions_include'] as $ext) {
-                $mime = FileInfo::extensionToMimeType($ext);
+                $mime = $this->fileInfo->extensionToMimeType($ext);
                 if (!empty($mime)) {
                     $c['mimetypes_include'][] = $mime;
                 }
@@ -165,7 +171,7 @@ class Image implements AssetInterface
 
             $c['mimetypes_exclude'] = array();
             foreach ($c['extensions_exclude'] as $ext) {
-                $mime = FileInfo::extensionToMimeType($ext);
+                $mime = $this->fileInfo->extensionToMimeType($ext);
                 if (!empty($mime)) {
                     $c['mimetypes_exclude'][] = $mime;
                 }

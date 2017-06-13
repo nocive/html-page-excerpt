@@ -27,9 +27,9 @@ class Url implements AssetInterface
     protected $fetched = false;
 
     /**
-     * @param string     $url
-     * @param bool       $sanitize
-     * @param bool       $fetch
+     * @param string|null $url
+     * @param bool        $sanitize
+     * @param bool        $fetch
      */
     public function __construct($url = null, $sanitize = true, $fetch = false)
     {

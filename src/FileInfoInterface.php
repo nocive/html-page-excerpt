@@ -4,7 +4,7 @@ namespace HTMLPageExcerpt;
 
 interface FileInfoInterface
 {
-    public static function mimeTypeToExtension($mimeType);
-    public static function extensionToMimeType($extension);
-    public static function detectMimeType($filename);
+    public function mimeTypeToExtension($mimeType);
+    public function extensionToMimeType($extension);
+    public function detectMimeType($filename);
 }

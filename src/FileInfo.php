@@ -2,6 +2,7 @@
 
 namespace HTMLPageExcerpt;
 
+use Mimey\MimeTypes;
 use Mimey\MimeTypesInterface;
 
 class FileInfo implements FileInfoInterface
@@ -12,14 +13,25 @@ class FileInfo implements FileInfoInterface
     /** @var \finfo */
     private static $finfo;
 
+    public function __construct()
+    {
+        if (null === static::$mimey) {
+            static::$mimey = new MimeTypes();
+        }
+
+        if (null === static::$finfo) {
+            static::$finfo = new \finfo(FILEINFO_MIME_TYPE);
+        }
+    }
+
     /**
      * @param  string $mimeType
      *
      * @return string
      */
-    public static function mimeTypeToExtension($mimeType)
+    public function mimeTypeToExtension($mimeType)
     {
-        return self::getMimey()->getExtension($mimeType);
+        return static::$mimey->getExtension($mimeType);
     }
 
     /**
@@ -27,9 +39,9 @@ class FileInfo implements FileInfoInterface
      *
      * @return string
      */
-    public static function extensionToMimeType($extension)
+    public function extensionToMimeType($extension)
     {
-        return self::getMimey()->getMimeType($extension);
+        return static::$mimey->getMimeType($extension);
     }
 
     /**
@@ -37,26 +49,8 @@ class FileInfo implements FileInfoInterface
      *
      * @return string
      */
-    public static function detectMimeType($filename)
+    public function detectMimeType($filename)
     {
-        return self::getFinfo()->file($filename);
-    }
-
-    private static function getMimey()
-    {
-        if (null === self::$mimey) {
-            self::$mimey = new \Mimey\MimeTypes();
-        }
-
-        return self::$mimey;
-    }
-
-    private static function getFinfo()
-    {
-        if (null === self::$finfo) {
-            self::$finfo = new \finfo(FILEINFO_MIME_TYPE);
-        }
-
-        return self::$finfo;
+        return static::$finfo->file($filename);
     }
 }

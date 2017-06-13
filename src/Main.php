@@ -85,6 +85,10 @@ final class Main
      */
     public function get($fields, $flatten = false)
     {
+        if (null === $this->document) {
+            throw new \LogicException('Document not loaded, you need to load it via loadHTML() or loadURL() methods');
+        }
+
         return $this->document->get($fields, $flatten);
     }
 
@@ -93,6 +97,10 @@ final class Main
      */
     public function getAsArray()
     {
+        if (null === $this->document) {
+            throw new \LogicException('Document not loaded, you need to load it via loadHTML() or loadURL() methods');
+        }
+
         return $this->document->get('*', $flatten = true);
     }
 
@@ -101,6 +109,10 @@ final class Main
      */
     public function getAsJson()
     {
+        if (null === $this->document) {
+            throw new \LogicException('Document not loaded, you need to load it via loadHTML() or loadURL() methods');
+        }
+
         return json_encode($this->getAsArray());
     }
 
